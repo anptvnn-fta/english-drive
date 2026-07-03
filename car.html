@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060910">
+<title>Trên xe — EngDrive</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="car-body">
+
+<div class="car-progress" id="progressBar" style="width:0"></div>
+
+<div class="car-top">
+  <button class="car-btn-sm" id="btnHome" title="Trang chủ">⌂</button>
+  <div class="phase learn" id="phasePill">SẴN SÀNG</div>
+  <div class="mono muted" id="todayInfo"></div>
+  <button class="car-btn-sm" id="btnDrawer" title="Cài đặt">⚙</button>
+</div>
+
+<div class="car-stage" id="stage" title="Chạm để đọc lại từ này">
+  <div class="car-word" id="wWord">EngDrive</div>
+  <div class="car-ipa" id="wIpa"></div>
+  <div class="car-vi" id="wVi"></div>
+  <div class="rep-dots" id="dots"></div>
+</div>
+
+<div class="car-controls">
+  <button class="car-btn" id="btnPrev" title="Từ trước">⏮</button>
+  <button class="car-btn main" id="btnPlay" title="Phát / Dừng">▶</button>
+  <button class="car-btn" id="btnNext" title="Từ sau">⏭</button>
+</div>
+
+<div class="car-overlay" id="startOverlay">
+  <h2>🚗 Học tiếng Anh trên xe</h2>
+  <p id="overlayInfo">Ôn từ đến hạn trước, rồi học từ mới theo lộ trình.<br>Cứ 5 từ ôn một lượt, 5 lô có bài ôn tập lớn.</p>
+  <button class="btn btn-amber" id="btnStart">▶ &nbsp;Bắt đầu</button>
+  <p class="muted" id="voiceWarn" style="font-size:0.95rem"></p>
+</div>
+
+<div class="car-drawer" id="drawer">
+  <h3>⚙ Cài đặt</h3>
+  <div class="setting">
+    <label>Số lần lặp mỗi từ: <output id="repsOut"></output></label>
+    <input type="range" id="setReps" min="3" max="5" step="1">
+  </div>
+  <div class="setting">
+    <label>Giãn cách giữa các lần lặp: <output id="gapOut"></output> giây</label>
+    <input type="range" id="setGap" min="5" max="10" step="1">
+  </div>
+  <div class="setting">
+    <label>Tốc độ đọc tiếng Anh: <output id="rateOut"></output></label>
+    <input type="range" id="setRate" min="0.7" max="1.1" step="0.05">
+  </div>
+  <div class="settings-actions">
+    <button class="btn" id="btnTestEn">🔊 Thử giọng Anh</button>
+    <button class="btn" id="btnTestVi">🔊 Thử giọng Việt</button>
+  </div>
+  <div class="settings-actions">
+    <button class="btn btn-amber" id="btnDrawerClose">Xong</button>
+  </div>
+</div>
+
+<script src="data/level1.js"></script>
+<script src="data/level2.js"></script>
+<script src="data/level3.js"></script>
+<script src="data/level4.js"></script>
+<script src="js/core.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/car.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+/* ============================================================
+   Đồng bộ tiến độ đa thiết bị qua Supabase.
+   Bảo mật bằng "mã đồng bộ" bí mật (không cần đăng nhập):
+   server chỉ trả dữ liệu khi biết đúng mã, không liệt kê được.
+   ============================================================ */
+
+const SYNC = {
+  url: "https://ivcqqhofayvssammkini.supabase.co",
+  key: "sb_publishable_C6Pg0v35A6AVp0Pd8--Z5Q_r_t3nYZr",
+  codeKey: "engdrive.synccode",
+  lastKey: "engdrive.synclast",
+  dirty: false,
+  pushTimer: null,
+  status: "off", // off | ok | error | syncing
+  onStatus: null,
+
+  get code() { return localStorage.getItem(this.codeKey) || ""; },
+  setCode(v) {
+    if (v) localStorage.setItem(this.codeKey, v.trim());
+    else localStorage.removeItem(this.codeKey);
+  },
+  newCode() {
+    const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+    const buf = new Uint8Array(16);
+    crypto.getRandomValues(buf);
+    let s = "";
+    for (let i = 0; i < 16; i++) {
+      s += chars[buf[i] % chars.length];
+      if (i % 4 === 3 && i < 15) s += "-";
+    }
+    return s;
+  },
+
+  _set(status) {
+    this.status = status;
+    if (this.onStatus) this.onStatus(status);
+  },
+
+  async rpc(fn, body, keepalive = false) {
+    const res = await fetch(`${this.url}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      keepalive,
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": this.key,
+        "Authorization": `Bearer ${this.key}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`sync ${fn} ${res.status}`);
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  },
+
+  async pull() {
+    if (!this.code) return null;
+    return this.rpc("get_progress", { sync_code: this.code });
+  },
+
+  async push(keepalive = false) {
+    if (!this.code) return;
+    await this.rpc("put_progress", { sync_code: this.code, payload: Store.data }, keepalive);
+    this.dirty = false;
+    localStorage.setItem(this.lastKey, String(Date.now()));
+  },
+
+  /* Trộn tiến độ từ máy khác: mỗi từ giữ bản tiến bộ hơn, log lấy max theo ngày */
+  merge(remote) {
+    if (!remote || typeof remote !== "object") return false;
+    const L = Store.data;
+    let changed = false;
+    for (const [w, r] of Object.entries(remote.words || {})) {
+      const l = L.words[w];
+      if (!l) { L.words[w] = r; changed = true; continue; }
+      const better = r.seen > l.seen ||
+        (r.seen === l.seen && (r.box > l.box || (r.box === l.box && r.due > l.due)));
+      if (better) { L.words[w] = r; changed = true; }
+    }
+    for (const [d, row] of Object.entries(remote.log || {})) {
+      const lr = L.log[d] || (L.log[d] = { new: 0, review: 0, car: 0 });
+      for (const k of ["new", "review", "car"]) {
+        const v = Math.max(lr[k] || 0, row[k] || 0);
+        if (v !== (lr[k] || 0)) { lr[k] = v; changed = true; }
+      }
+    }
+    if ((remote.settingsAt || 0) > (L.settingsAt || 0)) {
+      L.settings = { ...L.settings, ...remote.settings };
+      L.settingsAt = remote.settingsAt;
+      changed = true;
+    }
+    return changed;
+  },
+
+  async syncNow() {
+    if (!this.code) { this._set("off"); return false; }
+    this._set("syncing");
+    try {
+      const remote = await this.pull();
+      this.merge(remote);
+      localStorage.setItem(Store.key, JSON.stringify(Store.data)); // lưu không kích hoạt markDirty
+      await this.push();
+      this._set("ok");
+      return true;
+    } catch (e) {
+      console.warn("sync failed", e);
+      this._set("error");
+      return false;
+    }
+  },
+
+  markDirty() {
+    if (!this.code) return;
+    this.dirty = true;
+    clearTimeout(this.pushTimer);
+    this.pushTimer = setTimeout(() => {
+      this.push().then(() => this._set("ok")).catch(() => this._set("error"));
+    }, 4000);
+  },
+
+  /* Gọi 1 lần khi trang tải: kéo về, trộn, gọi lại callback để vẽ lại UI */
+  async init(onMerged) {
+    window.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && this.dirty) {
+        this.push(true).catch(() => {});
+      }
+    });
+    if (!this.code) { this._set("off"); return; }
+    this._set("syncing");
+    try {
+      const remote = await this.pull();
+      const changed = this.merge(remote);
+      localStorage.setItem(Store.key, JSON.stringify(Store.data));
+      await this.push();
+      this._set("ok");
+      if (changed && onMerged) onMerged();
+    } catch (e) {
+      console.warn("sync init failed", e);
+      this._set("error");
+    }
+  },
+};

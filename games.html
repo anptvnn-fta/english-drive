@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0e17">
+<title>Trò chơi — EngDrive</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="logo"><span class="dot-road"></span>ENG<em>DRIVE</em></div>
+    <nav class="nav">
+      <a href="index.html">Trang chủ</a>
+      <a href="car.html">🚗 Trên xe</a>
+      <a href="learn.html">Flashcard</a>
+      <a href="games.html" class="active">Trò chơi</a>
+      <a href="speak.html">Phát âm</a>
+    </nav>
+  </header>
+
+  <section id="gamePick">
+    <div class="study-head">
+      <h2 style="font-size:1.3rem">🎮 Chọn trò — mỗi vòng 10 câu</h2>
+      <span class="pill">Từ để chơi: <b id="poolCount">0</b></span>
+    </div>
+    <div class="game-pick">
+      <button class="mode game-card" data-game="envi"><span class="ico">🇬🇧→🇻🇳</span><b>Chọn nghĩa</b><span>Thấy từ tiếng Anh, chọn nghĩa đúng</span></button>
+      <button class="mode game-card" data-game="vien"><span class="ico">🇻🇳→🇬🇧</span><b>Chọn từ</b><span>Thấy nghĩa, chọn từ tiếng Anh đúng</span></button>
+      <button class="mode game-card" data-game="listen"><span class="ico">🎧</span><b>Nghe chọn từ</b><span>Nghe rồi chọn đúng từ vừa đọc</span></button>
+      <button class="mode game-card" data-game="spell"><span class="ico">🧩</span><b>Xếp chữ</b><span>Ghép các chữ cái thành từ đúng</span></button>
+    </div>
+  </section>
+
+  <section id="gameZone" class="hidden">
+    <div class="game-hud">
+      <button class="btn btn-ghost" id="btnQuit">← Đổi trò</button>
+      <span class="pill">Câu <b id="qNum">1</b>/10</span>
+      <span class="hud-streak" id="hudStreak"></span>
+      <span class="hud-score" id="hudScore">0 điểm</span>
+    </div>
+    <div class="quiz-prompt" id="quizPrompt"></div>
+    <div class="options" id="options"></div>
+    <div id="spellZone" class="hidden">
+      <div class="slots" id="slots"></div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+  </section>
+
+  <section id="gameDone" class="done-panel hidden">
+    <div class="big">🏁</div>
+    <h2 id="doneTitle">Hết vòng!</h2>
+    <p class="muted" id="doneMsg"></p>
+    <p style="margin-top:16px">
+      <button class="btn btn-amber" id="btnAgain">Chơi vòng nữa</button>
+      <a class="btn" href="index.html">Về trang chủ</a>
+    </p>
+  </section>
+
+</div>
+
+<script src="data/level1.js"></script>
+<script src="data/level2.js"></script>
+<script src="data/level3.js"></script>
+<script src="data/level4.js"></script>
+<script src="js/core.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/games.js"></script>
+</body>
+</html>

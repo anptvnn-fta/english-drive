@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0e17">
+<title>Flashcard — EngDrive</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="logo"><span class="dot-road"></span>ENG<em>DRIVE</em></div>
+    <nav class="nav">
+      <a href="index.html">Trang chủ</a>
+      <a href="car.html">🚗 Trên xe</a>
+      <a href="learn.html" class="active">Flashcard</a>
+      <a href="games.html">Trò chơi</a>
+      <a href="speak.html">Phát âm</a>
+    </nav>
+  </header>
+
+  <div class="study-head">
+    <h2 style="font-size:1.3rem">🃏 Flashcard — ôn ngắt quãng</h2>
+    <span class="pill">Còn lại: <b id="leftCount">0</b></span>
+  </div>
+
+  <div class="flash-zone" id="flashZone">
+    <div class="flashcard" id="flashcard">
+      <div class="flash-inner">
+        <div class="flash-face front">
+          <div class="flash-pos" id="fPos"></div>
+          <div class="flash-word" id="fWord"></div>
+          <div class="flash-ipa" id="fIpa"></div>
+          <button class="speak-icon" id="btnSayFront" title="Nghe">🔊</button>
+          <div class="flash-hint">Chạm vào thẻ để xem nghĩa</div>
+        </div>
+        <div class="flash-face back">
+          <div class="flash-word" id="bWord" style="font-size:1.6rem"></div>
+          <div class="flash-ipa" id="bIpa" style="font-size:1.1rem"></div>
+          <div class="flash-vi" id="bVi"></div>
+          <div class="flash-ex" id="bEx"></div>
+          <div class="flash-ex-vi" id="bExVi"></div>
+          <button class="speak-icon" id="btnSayEx" title="Nghe câu ví dụ">🔊 Nghe câu</button>
+        </div>
+      </div>
+    </div>
+    <div class="grade-row hidden" id="gradeRow">
+      <button class="grade g0" data-g="0">Quên<small>ôn lại 10 phút</small></button>
+      <button class="grade g1" data-g="1">Mơ hồ<small>ôn lại mai</small></button>
+      <button class="grade g2" data-g="2">Nhớ<small>giãn lịch ôn</small></button>
+      <button class="grade g3" data-g="3">Quá dễ<small>giãn xa hơn</small></button>
+    </div>
+  </div>
+
+  <div class="done-panel hidden" id="donePanel">
+    <div class="big">🎉</div>
+    <h2>Xong phiên hôm nay!</h2>
+    <p class="muted" id="doneStats"></p>
+    <p style="margin-top:16px">
+      <a class="btn btn-amber" href="games.html">🎮 Chơi 1 vòng cho chắc</a>
+      <button class="btn" id="btnMore">Học thêm 10 từ nữa</button>
+    </p>
+  </div>
+
+</div>
+
+<script src="data/level1.js"></script>
+<script src="data/level2.js"></script>
+<script src="data/level3.js"></script>
+<script src="data/level4.js"></script>
+<script src="js/core.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/learn.js"></script>
+</body>
+</html>

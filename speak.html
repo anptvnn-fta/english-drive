@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0e17">
+<title>Luyện phát âm — EngDrive</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="logo"><span class="dot-road"></span>ENG<em>DRIVE</em></div>
+    <nav class="nav">
+      <a href="index.html">Trang chủ</a>
+      <a href="car.html">🚗 Trên xe</a>
+      <a href="learn.html">Flashcard</a>
+      <a href="games.html">Trò chơi</a>
+      <a href="speak.html" class="active">Phát âm</a>
+    </nav>
+  </header>
+
+  <div class="study-head">
+    <h2 style="font-size:1.3rem">🎙️ Luyện phát âm</h2>
+    <span class="pill">Từ <b id="posNow">1</b>/<b id="posTotal">10</b> · đạt <b id="passCount">0</b></span>
+  </div>
+
+  <div class="warn-box" id="noSupport" style="display:none">
+    ⚠ Trình duyệt này không hỗ trợ nhận diện giọng nói — hãy mở bằng <b>Chrome</b> trên máy tính hoặc điện thoại.
+  </div>
+  <div class="warn-box">
+    💡 Phần này nên luyện trên <b>máy tính hoặc điện thoại</b> — mic bluetooth trên ô tô thường nhận không rõ.
+    Bấm mic, đọc to rõ từ trên màn hình, web sẽ chấm.
+  </div>
+
+  <div class="flash-zone">
+    <div class="quiz-prompt" style="width:min(620px,100%)">
+      <div class="quiz-word" id="sWord"></div>
+      <div class="quiz-sub" id="sIpa"></div>
+      <div class="quiz-vi-prompt" id="sVi" style="font-size:1.3rem;margin-top:6px"></div>
+      <button class="speak-icon" id="btnHear" style="margin-top:14px">🔊 Nghe mẫu</button>
+    </div>
+
+    <div class="mic-zone">
+      <button class="mic-btn" id="btnMic" title="Bấm rồi đọc từ">🎙️</button>
+      <div class="speak-result" id="result"><div class="muted">Bấm mic rồi đọc từ phía trên</div></div>
+      <div class="settings-actions">
+        <button class="btn" id="btnSkip">Bỏ qua →</button>
+        <button class="btn btn-amber hidden" id="btnNext">Từ tiếp theo →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-panel hidden" id="donePanel">
+    <div class="big">🎤</div>
+    <h2>Xong lượt phát âm!</h2>
+    <p class="muted" id="doneStats"></p>
+    <p style="margin-top:16px">
+      <button class="btn btn-amber" id="btnAgain">Luyện lượt nữa</button>
+      <a class="btn" href="index.html">Về trang chủ</a>
+    </p>
+  </div>
+
+</div>
+
+<script src="data/level1.js"></script>
+<script src="data/level2.js"></script>
+<script src="data/level3.js"></script>
+<script src="data/level4.js"></script>
+<script src="js/core.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/speak.js"></script>
+</body>
+</html>

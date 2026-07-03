@@ -1,0 +1,393 @@
+/* ============================================================
+   ENGDRIVE — Học tiếng Anh trên xe & máy tính
+   Aesthetic: "night drive dashboard" — đồng hồ xe hơi ban đêm
+   ============================================================ */
+
+:root {
+  --bg: #0a0e17;
+  --bg-deep: #060910;
+  --surface: #121a29;
+  --surface-2: #1a2438;
+  --line: #24334e;
+  --text: #f2f5fa;
+  --muted: #8a97ad;
+  --amber: #ffb020;
+  --amber-deep: #e08900;
+  --amber-glow: rgba(255, 176, 32, 0.14);
+  --cyan: #4dd8e6;
+  --cyan-glow: rgba(77, 216, 230, 0.12);
+  --green: #3ddc84;
+  --red: #ff5d5d;
+  --radius: 20px;
+  --font-main: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-main);
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(255, 176, 32, 0.07), transparent 60%),
+    radial-gradient(900px 600px at 90% 110%, rgba(77, 216, 230, 0.05), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+::selection { background: var(--amber); color: #14100a; }
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select { font-family: inherit; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ---------- Header / nav ---------- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 14px; margin-bottom: 12px;
+}
+.logo {
+  display: flex; align-items: baseline; gap: 10px;
+  font-weight: 800; font-size: 1.5rem; letter-spacing: 0.06em;
+}
+.logo .dot-road {
+  display: inline-block; width: 34px; height: 6px; border-radius: 3px;
+  background: repeating-linear-gradient(90deg, var(--amber) 0 8px, transparent 8px 14px);
+}
+.logo em { font-style: normal; color: var(--amber); }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav a {
+  padding: 8px 14px; border-radius: 999px; font-size: 0.92rem; color: var(--muted);
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.nav a:hover { color: var(--text); border-color: var(--line); }
+.nav a.active { color: var(--amber); border-color: var(--amber-deep); background: var(--amber-glow); }
+
+/* ---------- Cards & common ---------- */
+.card {
+  background: linear-gradient(180deg, var(--surface), var(--surface) 60%, rgba(18, 26, 41, 0.6));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.section-title {
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); margin: 34px 0 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: 14px; font-weight: 700; font-size: 1rem;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+  transition: transform 0.12s, background 0.2s, border-color 0.2s;
+}
+.btn:hover { border-color: var(--amber-deep); }
+.btn:active { transform: scale(0.97); }
+.btn-amber {
+  background: linear-gradient(180deg, var(--amber), var(--amber-deep));
+  color: #191203; border: none; box-shadow: 0 6px 24px rgba(255, 176, 32, 0.25);
+}
+.btn-amber:hover { filter: brightness(1.06); }
+.btn-ghost { background: transparent; }
+.mono { font-family: var(--font-mono); }
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+/* ---------- Dashboard: hero ---------- */
+.hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: stretch; }
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+
+.hero-car {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(500px 260px at 85% 20%, var(--amber-glow), transparent 70%),
+    linear-gradient(180deg, var(--surface), var(--bg-deep));
+  border: 1px solid var(--amber-deep);
+  border-radius: var(--radius); padding: 30px;
+  display: flex; flex-direction: column; gap: 10px; justify-content: space-between;
+}
+.hero-car::before {
+  /* vạch kẻ đường */
+  content: ""; position: absolute; right: 26px; top: 0; bottom: 0; width: 6px;
+  background: repeating-linear-gradient(180deg, rgba(255,176,32,0.5) 0 26px, transparent 26px 52px);
+  opacity: 0.5;
+}
+.hero-car h1 { font-size: 2rem; font-weight: 800; line-height: 1.15; }
+.hero-car h1 span { color: var(--amber); }
+.hero-car p { color: var(--muted); max-width: 40ch; }
+.hero-car .btn { align-self: flex-start; margin-top: 8px; font-size: 1.1rem; padding: 15px 28px; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 2px;
+}
+.stat b { font-size: 1.9rem; font-weight: 800; font-family: var(--font-mono); color: var(--amber); }
+.stat.cyan b { color: var(--cyan); }
+.stat span { font-size: 0.85rem; color: var(--muted); }
+
+/* ---------- Dashboard: mode cards ---------- */
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.mode {
+  display: flex; flex-direction: column; gap: 6px; padding: 20px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+}
+.mode:hover { transform: translateY(-3px); border-color: var(--amber-deep); box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+.mode .ico { font-size: 1.9rem; }
+.mode b { font-size: 1.08rem; }
+.mode span { font-size: 0.86rem; color: var(--muted); }
+
+/* ---------- Roadmap ---------- */
+.level { margin-bottom: 14px; }
+.level-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.level-num {
+  width: 44px; height: 44px; border-radius: 12px; flex: none;
+  display: grid; place-items: center; font-weight: 800; font-family: var(--font-mono);
+  background: var(--amber-glow); color: var(--amber); border: 1px solid var(--amber-deep);
+}
+.level.locked .level-num { background: var(--surface-2); color: var(--muted); border-color: var(--line); }
+.level-head b { font-size: 1.05rem; }
+.level-head .muted { font-size: 0.86rem; }
+.level-pct { margin-left: auto; font-family: var(--font-mono); color: var(--cyan); font-weight: 600; }
+.bar { height: 8px; border-radius: 4px; background: var(--surface-2); margin: 12px 0; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--amber-deep), var(--amber)); transition: width 0.6s; }
+.units { display: flex; flex-wrap: wrap; gap: 7px; }
+.unit-chip {
+  width: 34px; height: 22px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--surface-2); position: relative; cursor: default;
+}
+.unit-chip.part { background: linear-gradient(90deg, var(--amber-deep) 50%, var(--surface-2) 50%); opacity: 0.75; }
+.unit-chip.done { background: linear-gradient(180deg, var(--amber), var(--amber-deep)); border-color: var(--amber-deep); }
+
+/* ---------- Settings ---------- */
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.setting { display: flex; flex-direction: column; gap: 8px; }
+.setting label { font-size: 0.88rem; color: var(--muted); }
+.setting output { font-family: var(--font-mono); color: var(--amber); font-weight: 600; }
+select, input[type="number"] {
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; font-size: 1rem;
+}
+input[type="range"] { accent-color: var(--amber); height: 32px; }
+.settings-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+/* ============================================================
+   CAR MODE — màn hình trên xe: chữ cực to, thao tác cực ít
+   ============================================================ */
+body.car-body {
+  background: var(--bg-deep);
+  height: 100vh; height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
+  user-select: none; -webkit-user-select: none;
+}
+.car-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; flex: none; color: var(--muted); font-size: 0.95rem;
+}
+.car-top .phase {
+  font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.85rem;
+  padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+}
+.car-top .phase.learn { color: var(--amber); border-color: var(--amber-deep); background: var(--amber-glow); }
+.car-top .phase.review { color: var(--cyan); border-color: var(--cyan); background: var(--cyan-glow); }
+.car-top .car-btn-sm { font-size: 1.3rem; padding: 8px 12px; border-radius: 12px; }
+.car-top .car-btn-sm:active { background: var(--surface-2); }
+
+.car-stage {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 16px; gap: 1vh; min-height: 0; cursor: pointer;
+}
+.car-word {
+  font-size: clamp(3.4rem, 15vw, 11rem);
+  font-weight: 800; line-height: 1.02; letter-spacing: -0.01em;
+  text-shadow: 0 0 60px rgba(255, 176, 32, 0.18);
+  overflow-wrap: anywhere;
+}
+.car-ipa {
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 5.5vw, 3.6rem);
+  color: var(--cyan); font-weight: 500;
+}
+.car-vi {
+  font-size: clamp(2rem, 7.5vw, 5.2rem);
+  font-weight: 700; color: var(--amber); line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.rep-dots { display: flex; gap: 10px; margin-top: 1.5vh; }
+.rep-dots i {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--line); transition: all 0.25s;
+}
+.rep-dots i.on { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 12px rgba(255,176,32,0.6); }
+
+.car-controls {
+  flex: none; display: flex; align-items: center; justify-content: center; gap: 22px;
+  padding: 12px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.car-btn {
+  width: 78px; height: 78px; border-radius: 50%; font-size: 1.9rem;
+  background: var(--surface); border: 1px solid var(--line);
+  display: grid; place-items: center; transition: transform 0.1s, border-color 0.2s;
+}
+.car-btn:active { transform: scale(0.92); }
+.car-btn.main {
+  width: 104px; height: 104px; font-size: 2.6rem;
+  background: linear-gradient(180deg, var(--amber), var(--amber-deep));
+  color: #191203; border: none; box-shadow: 0 8px 34px rgba(255, 176, 32, 0.35);
+}
+.car-progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--amber); transition: width 0.4s; z-index: 5; }
+
+/* Màn chờ bắt đầu / hoàn thành */
+.car-overlay {
+  position: fixed; inset: 0; z-index: 10; background: rgba(6, 9, 16, 0.94);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; text-align: center; padding: 24px;
+}
+.car-overlay h2 { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; }
+.car-overlay p { color: var(--muted); font-size: 1.15rem; max-width: 46ch; }
+.car-overlay .btn-amber { font-size: 1.5rem; padding: 22px 54px; border-radius: 22px; }
+
+/* Drawer cài đặt trên xe */
+.car-drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: min(380px, 92vw); z-index: 20;
+  background: var(--surface); border-left: 1px solid var(--line); padding: 24px;
+  transform: translateX(100%); transition: transform 0.25s; overflow-y: auto;
+}
+.car-drawer.open { transform: translateX(0); }
+.car-drawer h3 { margin-bottom: 16px; }
+.car-drawer .setting { margin-bottom: 16px; }
+
+/* ============================================================
+   LEARN — flashcards
+   ============================================================ */
+.study-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+.pill {
+  padding: 6px 14px; border-radius: 999px; font-family: var(--font-mono); font-size: 0.9rem;
+  border: 1px solid var(--line); color: var(--muted);
+}
+.pill b { color: var(--amber); }
+
+.flash-zone { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.flashcard {
+  width: min(620px, 100%); min-height: 360px; perspective: 1200px; cursor: pointer;
+}
+.flash-inner {
+  position: relative; width: 100%; min-height: 360px;
+  transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.flashcard.flipped .flash-inner { transform: rotateY(180deg); }
+.flash-face {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: var(--radius); border: 1px solid var(--line); padding: 34px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-deep)); text-align: center;
+}
+.flash-face.back { transform: rotateY(180deg); border-color: var(--amber-deep); }
+.flash-word { font-size: clamp(2.4rem, 7vw, 4rem); font-weight: 800; }
+.flash-ipa { font-family: var(--font-mono); font-size: 1.5rem; color: var(--cyan); }
+.flash-pos { color: var(--muted); font-size: 0.95rem; }
+.flash-vi { font-size: 2rem; font-weight: 700; color: var(--amber); }
+.flash-ex { font-size: 1.15rem; margin-top: 8px; }
+.flash-ex-vi { color: var(--muted); font-size: 1rem; }
+.flash-hint { color: var(--muted); font-size: 0.85rem; margin-top: 14px; }
+.speak-icon { font-size: 1.6rem; padding: 10px 16px; border-radius: 14px; border: 1px solid var(--line); }
+.speak-icon:active { background: var(--surface-2); }
+
+.grade-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: min(620px, 100%); }
+.grade { padding: 16px 8px; border-radius: 14px; font-weight: 700; border: 1px solid var(--line); background: var(--surface); transition: transform 0.1s; }
+.grade:active { transform: scale(0.96); }
+.grade small { display: block; font-weight: 400; color: var(--muted); font-size: 0.75rem; margin-top: 3px; }
+.grade.g0 { color: var(--red); } .grade.g1 { color: #ffce6b; }
+.grade.g2 { color: var(--green); } .grade.g3 { color: var(--cyan); }
+
+.done-panel { text-align: center; padding: 60px 20px; }
+.done-panel .big { font-size: 3.4rem; }
+.done-panel h2 { font-size: 1.8rem; margin: 10px 0 6px; }
+
+/* ============================================================
+   GAMES
+   ============================================================ */
+.game-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.game-card { text-align: left; }
+.game-hud { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.hud-score { font-family: var(--font-mono); font-size: 1.3rem; color: var(--amber); font-weight: 700; }
+.hud-streak { color: var(--cyan); font-family: var(--font-mono); }
+
+.quiz-prompt {
+  text-align: center; padding: 34px 20px; border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface), var(--bg-deep));
+  border: 1px solid var(--line); margin-bottom: 18px;
+}
+.quiz-word { font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 800; }
+.quiz-sub { font-family: var(--font-mono); color: var(--cyan); font-size: 1.3rem; margin-top: 4px; }
+.quiz-vi-prompt { font-size: 1.9rem; font-weight: 700; color: var(--amber); }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .options { grid-template-columns: 1fr; } }
+.opt {
+  padding: 18px; border-radius: 14px; font-size: 1.15rem; font-weight: 600;
+  background: var(--surface); border: 1px solid var(--line); text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.opt:hover { border-color: var(--amber-deep); }
+.opt.correct { background: rgba(61, 220, 132, 0.14); border-color: var(--green); color: var(--green); }
+.opt.wrong { background: rgba(255, 93, 93, 0.12); border-color: var(--red); color: var(--red); }
+.opt:disabled { cursor: default; }
+
+/* Xếp chữ */
+.slots, .tiles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.slots { margin-bottom: 22px; min-height: 58px; }
+.slot, .tile {
+  width: 50px; height: 56px; border-radius: 12px; display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700;
+}
+.slot { background: var(--bg-deep); border: 1px dashed var(--line); color: var(--amber); }
+.slot.filled { border-style: solid; border-color: var(--amber-deep); }
+.slot.space { border: none; background: none; width: 22px; }
+.tile { background: var(--surface-2); border: 1px solid var(--line); transition: transform 0.1s; }
+.tile:active { transform: scale(0.9); }
+.tile.used { opacity: 0.25; pointer-events: none; }
+
+/* ============================================================
+   SPEAK — luyện phát âm
+   ============================================================ */
+.mic-zone { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.mic-btn {
+  width: 110px; height: 110px; border-radius: 50%; font-size: 2.8rem;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border: 2px solid var(--line); display: grid; place-items: center; transition: all 0.2s;
+}
+.mic-btn.listening {
+  border-color: var(--red); box-shadow: 0 0 0 0 rgba(255, 93, 93, 0.5);
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 93, 93, 0.45); }
+  70% { box-shadow: 0 0 0 26px rgba(255, 93, 93, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 93, 93, 0); }
+}
+.speak-result { text-align: center; min-height: 90px; }
+.speak-result .verdict { font-size: 1.5rem; font-weight: 800; }
+.verdict.good { color: var(--green); } .verdict.close { color: var(--amber); } .verdict.bad { color: var(--red); }
+.heard { color: var(--muted); font-size: 1.05rem; margin-top: 4px; }
+.heard b { color: var(--text); font-family: var(--font-mono); }
+.warn-box {
+  background: rgba(255, 176, 32, 0.08); border: 1px solid var(--amber-deep);
+  border-radius: 14px; padding: 14px 18px; font-size: 0.95rem; margin-bottom: 18px;
+}
+
+/* ---------- misc ---------- */
+.fade-in { animation: fadeIn 0.35s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.toast {
+  position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+  background: var(--surface-2); border: 1px solid var(--amber-deep); color: var(--text);
+  padding: 12px 22px; border-radius: 999px; z-index: 50; font-weight: 600;
+  animation: fadeIn 0.25s ease both;
+}
