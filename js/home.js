@@ -62,13 +62,41 @@ const Home = {
       toast("Đã tạo mã. Nhập đúng mã này trên thiết bị kia.");
       this.renderSync();
     };
+    // nhập mã qua ô input (prompt() bị chặn trên nhiều màn hình Android ô tô)
     this.el("btnEnterCode").onclick = async () => {
-      const v = prompt("Nhập mã đồng bộ (dạng xxxx-xxxx-xxxx-xxxx):", SYNC.code || "");
-      if (!v) return;
-      SYNC.setCode(v.toLowerCase().trim());
-      const okd = await SYNC.syncNow();
-      toast(okd ? "Đã kết nối và gộp tiến độ!" : "Không kết nối được — kiểm tra mã/mạng.");
-      this.refresh();
+      const v = (this.el("syncCodeInput").value || "").toLowerCase().trim();
+      if (!v) return toast("Gõ mã vào ô bên cạnh trước đã anh.");
+      if (v.replace(/-/g, "").length < 12) return toast("Mã không hợp lệ — kiểm tra lại.");
+      const oldCode = SYNC.code;
+      SYNC.setCode(v);
+      let remote = null;
+      try { remote = await SYNC.pull(); }
+      catch { SYNC.setCode(oldCode); return toast("Không kết nối được — kiểm tra mạng."); }
+      const n = remote && remote.words ? Object.keys(remote.words).length : 0;
+      const confirmBox = this.el("syncConfirm");
+      if (n > 0) {
+        // mã đã có dữ liệu: cho xem trước, xác nhận rồi mới gộp — tránh gộp nhầm mã người khác
+        confirmBox.classList.remove("hidden");
+        confirmBox.innerHTML =
+          `Mã này đang giữ tiến độ <b>${n} từ</b>. Gộp vào máy này? ` +
+          `<button class="btn btn-amber" id="btnMergeYes" style="margin:0 6px">Gộp tiến độ</button>` +
+          `<button class="btn" id="btnMergeNo">Hủy</button>`;
+        document.getElementById("btnMergeYes").onclick = async () => {
+          confirmBox.classList.add("hidden");
+          const okd = await SYNC.syncNow();
+          toast(okd ? "Đã kết nối và gộp tiến độ!" : "Đồng bộ lỗi — thử lại sau.");
+          this.refresh();
+        };
+        document.getElementById("btnMergeNo").onclick = () => {
+          SYNC.setCode(oldCode);
+          confirmBox.classList.add("hidden");
+          this.renderSync();
+        };
+      } else {
+        const okd = await SYNC.syncNow();
+        toast(okd ? "Đã kết nối!" : "Đồng bộ lỗi — thử lại sau.");
+        this.refresh();
+      }
     };
     this.el("btnSyncNow").onclick = async () => {
       if (!SYNC.code) return toast("Chưa có mã đồng bộ — bấm Tạo mã mới trước.");

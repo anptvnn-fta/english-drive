@@ -58,9 +58,13 @@
       tiến độ hai nơi sẽ tự gộp làm một.
     </p>
     <div id="syncStatus" class="pill" style="margin-bottom:14px">Chưa bật</div>
+    <div id="syncConfirm" class="warn-box hidden" style="margin-bottom:14px"></div>
     <div class="settings-actions">
+      <input type="text" id="syncCodeInput" placeholder="xxxx-xxxx-xxxx-xxxx"
+        autocomplete="off" autocapitalize="off" spellcheck="false"
+        style="background:var(--surface-2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-family:var(--font-mono);font-size:1rem;min-width:220px">
+      <button class="btn" id="btnEnterCode">Kết nối mã này</button>
       <button class="btn btn-amber" id="btnNewCode">Tạo mã mới</button>
-      <button class="btn" id="btnEnterCode">Nhập mã có sẵn</button>
       <button class="btn" id="btnSyncNow">Đồng bộ ngay</button>
       <button class="btn btn-ghost" id="btnSyncOff">Tắt đồng bộ</button>
     </div>

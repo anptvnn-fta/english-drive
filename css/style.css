@@ -197,7 +197,10 @@ body.car-body {
 }
 .car-top .phase.learn { color: var(--amber); border-color: var(--amber-deep); background: var(--amber-glow); }
 .car-top .phase.review { color: var(--cyan); border-color: var(--cyan); background: var(--cyan-glow); }
-.car-top .car-btn-sm { font-size: 1.3rem; padding: 8px 12px; border-radius: 12px; }
+.car-top .car-btn-sm {
+  font-size: 1.5rem; min-width: 56px; min-height: 56px;
+  display: grid; place-items: center; border-radius: 14px;
+}
 .car-top .car-btn-sm:active { background: var(--surface-2); }
 
 .car-stage {
@@ -210,6 +213,9 @@ body.car-body {
   text-shadow: 0 0 60px rgba(255, 176, 32, 0.18);
   overflow-wrap: anywhere;
 }
+/* từ dài co chữ lại thay vì ngắt giữa chữ */
+.car-word.long { font-size: clamp(2.6rem, 10vw, 7.5rem); }
+.car-word.vlong { font-size: clamp(2rem, 7vw, 5.2rem); }
 .car-ipa {
   font-family: var(--font-mono);
   font-size: clamp(1.5rem, 5.5vw, 3.6rem);
@@ -255,6 +261,14 @@ body.car-body {
 .car-overlay .btn-amber { font-size: 1.5rem; padding: 22px 54px; border-radius: 22px; }
 
 /* Drawer cài đặt trên xe */
+.car-backdrop {
+  position: fixed; inset: 0; z-index: 19; background: rgba(6, 9, 16, 0.6);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.car-backdrop.open { opacity: 1; pointer-events: auto; }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.drawer-head h3 { margin: 0; }
+.drawer-close { font-size: 1.4rem; min-width: 52px; min-height: 52px; border-radius: 12px; border: 1px solid var(--line); }
 .car-drawer {
   position: fixed; right: 0; top: 0; bottom: 0; width: min(380px, 92vw); z-index: 20;
   background: var(--surface); border-left: 1px solid var(--line); padding: 24px;

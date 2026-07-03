@@ -42,8 +42,12 @@
   <p class="muted" id="voiceWarn" style="font-size:0.95rem"></p>
 </div>
 
+<div class="car-backdrop" id="drawerBackdrop"></div>
 <div class="car-drawer" id="drawer">
-  <h3>⚙ Cài đặt</h3>
+  <div class="drawer-head">
+    <h3>⚙ Cài đặt</h3>
+    <button class="drawer-close" id="btnDrawerX">✕</button>
+  </div>
   <div class="setting">
     <label>Số lần lặp mỗi từ: <output id="repsOut"></output></label>
     <input type="range" id="setReps" min="3" max="5" step="1">

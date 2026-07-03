@@ -72,8 +72,9 @@ const SYNC = {
     for (const [w, r] of Object.entries(remote.words || {})) {
       const l = L.words[w];
       if (!l) { L.words[w] = r; changed = true; continue; }
-      const better = r.seen > l.seen ||
-        (r.seen === l.seen && (r.box > l.box || (r.box === l.box && r.due > l.due)));
+      // box (tiến độ SRS) quan trọng nhất, rồi tới hạn ôn xa hơn; seen chỉ để phân định cuối
+      const better = r.box > l.box ||
+        (r.box === l.box && (r.due > l.due || (r.due === l.due && r.seen > l.seen)));
       if (better) { L.words[w] = r; changed = true; }
     }
     for (const [d, row] of Object.entries(remote.log || {})) {
@@ -84,7 +85,16 @@ const SYNC = {
       }
     }
     if ((remote.settingsAt || 0) > (L.settingsAt || 0)) {
-      L.settings = { ...L.settings, ...remote.settings };
+      // chỉ nhận giá trị hợp lệ — file import/dữ liệu hỏng không phá được cài đặt
+      const s = remote.settings || {};
+      const num = (v, min, max, dflt) =>
+        (typeof v === "number" && isFinite(v) && v >= min && v <= max) ? v : dflt;
+      L.settings = {
+        reps: num(s.reps, 1, 10, L.settings.reps),
+        gap: num(s.gap, 1, 30, L.settings.gap),
+        rate: num(s.rate, 0.5, 2, L.settings.rate),
+        newPerDay: num(s.newPerDay, 0, 200, L.settings.newPerDay),
+      };
       L.settingsAt = remote.settingsAt;
       changed = true;
     }
@@ -98,6 +108,8 @@ const SYNC = {
       const remote = await this.pull();
       this.merge(remote);
       localStorage.setItem(Store.key, JSON.stringify(Store.data)); // lưu không kích hoạt markDirty
+      clearTimeout(this.pushTimer); // hủy push debounce cũ để không ghi đè lẫn nhau
+      this.pushTimer = null;
       await this.push();
       this._set("ok");
       return true;
@@ -130,6 +142,8 @@ const SYNC = {
       const remote = await this.pull();
       const changed = this.merge(remote);
       localStorage.setItem(Store.key, JSON.stringify(Store.data));
+      clearTimeout(this.pushTimer); // hủy push debounce cũ — push cuối này đã chứa dữ liệu mới nhất
+      this.pushTimer = null;
       await this.push();
       this._set("ok");
       if (changed && onMerged) onMerged();

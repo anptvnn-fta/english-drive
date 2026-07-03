@@ -94,7 +94,12 @@ const Speak = {
     this.listening = true;
     this.el("btnMic").classList.add("listening");
     this.el("result").innerHTML = `<div class="muted">Đang nghe… đọc từ đi anh!</div>`;
-    try { this.rec.start(); } catch {}
+    try { this.rec.start(); }
+    catch { // start() lỗi (bấm quá nhanh...) — trả lại trạng thái để bấm tiếp được
+      this.listening = false;
+      this.el("btnMic").classList.remove("listening");
+      this.el("result").innerHTML = `<div class="verdict bad">Mic chưa sẵn sàng — bấm lại nhé.</div>`;
+    }
   },
 
   next() {

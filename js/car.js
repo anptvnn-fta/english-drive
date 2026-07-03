@@ -13,6 +13,7 @@ const Car = {
   cycle: [],           // từ của các lô gần nhất (nguồn cho ôn tập lớn)
   mega: [], passive: [],
   sessionWords: [],    // mọi từ đã phát trong phiên
+  seenSet: new Set(),  // chống đếm trùng khi replay/quay lại
   playing: false,
   token: 0,
   wakeLock: null,
@@ -50,7 +51,11 @@ const Car = {
   render() {
     const w = this.currentWord();
     if (w) {
-      this.el("wWord").textContent = w.w;
+      const el = this.el("wWord");
+      el.textContent = w.w;
+      // từ/cụm dài thì co chữ lại để không bị ngắt giữa chữ
+      el.classList.toggle("long", w.w.length > 10 && w.w.length <= 16);
+      el.classList.toggle("vlong", w.w.length > 16);
       this.el("wIpa").textContent = "/" + w.i + "/";
       this.el("wVi").textContent = w.v;
     }
@@ -112,6 +117,7 @@ const Car = {
       this.phase = "passive";
       this.passive = shuffle(this.sessionWords.length ? this.sessionWords : SRS.learnedWords());
       if (!this.passive.length) this.passive = VOCAB.slice(0, 20);
+      if (!this.passive.length) { this.phase = "idle"; this.pause(); return; } // không có dữ liệu
     } else {
       this.phase = "learn";
     }
@@ -126,9 +132,12 @@ const Car = {
         const wasNew = Store.st(w.w).box === 0;
         const done = await this.playWord(w, t);
         if (!done) return;
-        SRS.carSeen(w.w);
-        if (wasNew) this.countNew++; else this.countReview++;
-        this.sessionWords.push(w);
+        if (!this.seenSet.has(w.w)) { // replay/quay lại không đếm trùng
+          this.seenSet.add(w.w);
+          SRS.carSeen(w.w);
+          if (wasNew) this.countNew++; else this.countReview++;
+          this.sessionWords.push(w);
+        }
         this.wi++;
       } else if (this.phase === "review") {
         if (this.wi >= this.batch.length) {
@@ -150,11 +159,17 @@ const Car = {
         if (!await this.playOnce(this.mega[this.wi], t, 2000)) return;
         this.wi++;
       } else if (this.phase === "passive") {
+        if (!this.passive.length) { this.pause(); return; }
         if (this.wi >= this.passive.length) {
           this.passive = shuffle(this.passive);
           this.wi = 0;
         }
-        if (!await this.playOnce(this.passive[this.wi], t, 2500)) return;
+        const pw = this.passive[this.wi];
+        if (!await this.playOnce(pw, t, 2500)) return;
+        if (!this.seenSet.has(pw.w)) { // nghe thụ động cũng dời hạn ôn, 1 lần/phiên
+          this.seenSet.add(pw.w);
+          SRS.carSeen(pw.w);
+        }
         this.wi++;
       } else return;
     }
@@ -196,14 +211,21 @@ const Car = {
     const w = this.currentWord();
     if (!w) return;
     this.token++; TTS.stop();
-    const t = this.token;
-    const wasPlaying = this.playing;
-    this.playing = true;
-    this.speakPair(w, t).then(() => {
-      if (t !== this.token) return;
-      if (wasPlaying) this.loop();
-      else this.playing = false;
-    });
+    if (this.playing) {
+      // đang phát: đọc lại từ này từ đầu (không đếm trùng nhờ seenSet)
+      this.rep = 0;
+      this.render();
+      this.loop();
+    } else {
+      // đang dừng: chỉ đọc 1 lần, không đụng vào trạng thái phát
+      const t = this.token;
+      TTS.speak(w.w, "en-US", this.s().rate).then(() => {
+        if (t !== this.token) return;
+        return sleep(450).then(() => {
+          if (t === this.token) TTS.speak(w.v.split(";")[0], "vi-VN", 1);
+        });
+      });
+    }
   },
 
   async requestWake() {
@@ -241,8 +263,14 @@ const Car = {
     this.el("btnPrev").onclick = () => this.jump(-1);
     this.el("stage").onclick = () => this.replay();
     this.el("btnHome").onclick = () => { this.pause(); location.href = "index.html"; };
-    this.el("btnDrawer").onclick = () => this.el("drawer").classList.add("open");
-    this.el("btnDrawerClose").onclick = () => this.el("drawer").classList.remove("open");
+    const openDrawer = (on) => {
+      this.el("drawer").classList.toggle("open", on);
+      this.el("drawerBackdrop").classList.toggle("open", on);
+    };
+    this.el("btnDrawer").onclick = () => openDrawer(true);
+    this.el("btnDrawerClose").onclick = () => openDrawer(false);
+    this.el("btnDrawerX").onclick = () => openDrawer(false);
+    this.el("drawerBackdrop").onclick = () => openDrawer(false);
 
     this.el("btnStart").onclick = () => {
       this.el("startOverlay").classList.add("hidden");
@@ -252,7 +280,13 @@ const Car = {
     };
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible" && this.playing) this.requestWake();
+      if (document.visibilityState === "visible" && this.playing) {
+        this.requestWake();
+        // khi tab bị ẩn, watchdog có thể đã "đọc chay" — quay lại thì đọc lại từ đang dở
+        this.token++; TTS.stop(); this.rep = 0;
+        this.render();
+        this.loop();
+      }
     });
 
     // cảnh báo nếu thiếu giọng đọc

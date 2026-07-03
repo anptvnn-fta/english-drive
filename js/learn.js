@@ -79,14 +79,18 @@ const Learn = {
       b.onclick = () => this.grade(+b.dataset.g);
     });
     this.el("btnMore").onclick = () => {
+      this.buildQueue(10);
+      if (!this.queue.length) {
+        return toast("Anh đã học hết từ hiện có — quay lại hôm sau để ôn định kỳ nhé!");
+      }
       this.el("flashZone").classList.remove("hidden");
       this.el("donePanel").classList.add("hidden");
-      this.buildQueue(10);
-      if (!this.queue.length) return this.finish();
       this.show();
     };
-    // phím tắt máy tính: space lật, 1-4 chấm
+    // phím tắt máy tính: space lật, 1-4 chấm (không chặn khi focus đang ở nút/ô nhập)
     document.addEventListener("keydown", e => {
+      const tag = document.activeElement?.tagName;
+      if (tag === "BUTTON" || tag === "INPUT" || tag === "A" || tag === "TEXTAREA") return;
       if (e.code === "Space") { e.preventDefault(); this.flip(); }
       if (["1", "2", "3", "4"].includes(e.key) &&
           !this.el("gradeRow").classList.contains("hidden")) {

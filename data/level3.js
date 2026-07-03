@@ -4,7 +4,7 @@ window.VOCAB_L3 = [
   {w:"table", p:"n", i:"ˈteɪbəl", v:"bảng dữ liệu", ex:"Each table has rows and columns.", xv:"Mỗi bảng có các hàng và cột.", t:"Dữ liệu cơ bản"},
   {w:"row", p:"n", i:"roʊ", v:"hàng; dòng dữ liệu", ex:"Delete the empty row from the table.", xv:"Xóa hàng trống khỏi bảng.", t:"Dữ liệu cơ bản"},
   {w:"column", p:"n", i:"ˈkɑːləm", v:"cột dữ liệu", ex:"Add a new column for the date.", xv:"Thêm một cột mới cho ngày tháng.", t:"Dữ liệu cơ bản"},
-  {w:"value", p:"n", i:"ˈvælju", v:"giá trị; dữ liệu ô", ex:"The cell value is missing here.", xv:"Giá trị ô đang bị thiếu ở đây.", t:"Dữ liệu cơ bản"},
+  {w:"value", p:"n", i:"ˈvæljuː", v:"giá trị; dữ liệu ô", ex:"The cell value is missing here.", xv:"Giá trị ô đang bị thiếu ở đây.", t:"Dữ liệu cơ bản"},
   {w:"record", p:"n", i:"ˈrekərd", v:"bản ghi; dòng dữ liệu", ex:"Each record represents one customer.", xv:"Mỗi bản ghi đại diện cho một khách hàng.", t:"Dữ liệu cơ bản"},
   {w:"field", p:"n", i:"fiːld", v:"trường dữ liệu", ex:"The name field cannot be empty.", xv:"Trường tên không được để trống.", t:"Dữ liệu cơ bản"},
   {w:"dataset", p:"n", i:"ˈdeɪtəsɛt", v:"tập dữ liệu", ex:"This dataset has 10,000 rows.", xv:"Tập dữ liệu này có 10.000 hàng.", t:"Dữ liệu cơ bản"},

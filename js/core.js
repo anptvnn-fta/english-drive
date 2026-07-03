@@ -84,7 +84,7 @@ const SRS = {
     const now = Date.now();
     st.seen++;
     if (g === 0) { st.bad++; st.box = 1; st.due = now + 10 * 60000; }
-    else if (g === 1) { st.ok++; st.box = Math.max(1, st.box); st.due = now + DAY; }
+    else if (g === 1) { st.ok++; st.box = Math.max(1, st.box); st.due = now + Math.max(1, INTERVALS[st.box] * 0.5) * DAY; }
     else if (g === 2) { st.ok++; st.box = Math.min(7, st.box + 1); st.due = now + INTERVALS[st.box] * DAY; }
     else { st.ok++; st.box = Math.min(7, st.box + 2); st.due = now + INTERVALS[st.box] * DAY; }
     Store.logInc(wasNew ? "new" : "review");
@@ -130,31 +130,39 @@ const SRS = {
 
 /* ---------- TTS: đọc tiếng Anh + tiếng Việt ---------- */
 const TTS = {
-  enVoice: null, viVoice: null,
+  enVoice: null, viVoice: null, _cancelledAt: 0,
+  pick() {
+    const vs = speechSynthesis.getVoices();
+    const find = (pref) => {
+      const cands = vs.filter(v => v.lang.replace("_", "-").toLowerCase().startsWith(pref));
+      cands.sort((a, b) =>
+        (b.name.includes("Google") - a.name.includes("Google")) ||
+        (b.name.includes("Natural") - a.name.includes("Natural")) ||
+        (b.localService - a.localService));
+      return cands[0] || null;
+    };
+    this.enVoice = find("en-us") || find("en");
+    this.viVoice = find("vi");
+  },
   init() {
     if (!("speechSynthesis" in window)) return;
-    const pick = () => {
-      const vs = speechSynthesis.getVoices();
-      const find = (pref) => {
-        const cands = vs.filter(v => v.lang.replace("_", "-").toLowerCase().startsWith(pref));
-        cands.sort((a, b) =>
-          (b.name.includes("Google") - a.name.includes("Google")) ||
-          (b.name.includes("Natural") - a.name.includes("Natural")) ||
-          (b.localService - a.localService));
-        return cands[0] || null;
-      };
-      this.enVoice = find("en-us") || find("en");
-      this.viVoice = find("vi");
-    };
-    pick();
-    speechSynthesis.onvoiceschanged = pick;
+    this.pick();
+    speechSynthesis.onvoiceschanged = () => this.pick();
   },
-  speak(text, lang = "en-US", rate = 1) {
+  async speak(text, lang = "en-US", rate = 1) {
+    if (!("speechSynthesis" in window) || !text) return;
+    // Chrome Android nuốt utterance được queue ngay sau cancel() (crbug 509488)
+    const sinceCancel = Date.now() - this._cancelledAt;
+    if (sinceCancel < 220) await new Promise(r => setTimeout(r, 220 - sinceCancel));
     return new Promise(resolve => {
-      if (!("speechSynthesis" in window) || !text) return resolve();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = lang;
-      const v = lang.startsWith("en") ? this.enVoice : this.viVoice;
+      // giọng có thể load muộn trên Android — thử chọn lại ngay trước khi đọc
+      let v = lang.startsWith("en") ? this.enVoice : this.viVoice;
+      if (!v) {
+        this.pick();
+        v = lang.startsWith("en") ? this.enVoice : this.viVoice;
+      }
       if (v) u.voice = v;
       u.rate = rate;
       let done = false;
@@ -166,7 +174,10 @@ const TTS = {
       speechSynthesis.speak(u);
     });
   },
-  stop() { try { speechSynthesis.cancel(); } catch {} },
+  stop() {
+    this._cancelledAt = Date.now();
+    try { speechSynthesis.cancel(); } catch {}
+  },
 };
 TTS.init();
 
