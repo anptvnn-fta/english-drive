@@ -27,6 +27,7 @@
   <div class="car-ipa" id="wIpa"></div>
   <div class="car-vi" id="wVi"></div>
   <div class="rep-dots" id="dots"></div>
+  <div class="shadow-hint hidden" id="shadowHint"></div>
 </div>
 
 <div class="car-controls">
@@ -60,6 +61,21 @@
     <label>Tốc độ đọc tiếng Anh: <output id="rateOut"></output></label>
     <input type="range" id="setRate" min="0.7" max="1.1" step="0.05">
   </div>
+  <div class="setting">
+    <label>Giọng đọc tiếng Anh</label>
+    <select id="setVoiceMode">
+      <option value="mix">Trộn nhiều giọng (Mỹ, Anh, Úc…)</option>
+      <option value="single">Chỉ một giọng Mỹ</option>
+    </select>
+    <span class="muted" id="voiceCount" style="font-size:0.85rem"></span>
+  </div>
+  <div class="setting">
+    <label style="display:flex;align-items:center;gap:12px;color:var(--text)">
+      <input type="checkbox" id="setShadow" style="width:24px;height:24px;accent-color:var(--amber)">
+      Đọc theo sau mỗi từ (cần mic)
+    </label>
+    <span class="muted" id="shadowSupport" style="font-size:0.85rem">Đọc đúng: ding + đi tiếp. Không nhận ra: vẫn tự đi tiếp, không phạt.</span>
+  </div>
   <div class="settings-actions">
     <button class="btn" id="btnTestEn">🔊 Thử giọng Anh</button>
     <button class="btn" id="btnTestVi">🔊 Thử giọng Việt</button>
@@ -73,6 +89,10 @@
 <script src="data/level2.js"></script>
 <script src="data/level3.js"></script>
 <script src="data/level4.js"></script>
+<script src="data/ngsl1.js"></script>
+<script src="data/ngsl2.js"></script>
+<script src="data/ngsl3.js"></script>
+<script src="vendor/ts-fsrs.umd.js"></script>
 <script src="js/core.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/car.js"></script>

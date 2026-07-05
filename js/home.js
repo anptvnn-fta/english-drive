@@ -114,8 +114,10 @@ const Home = {
   bindSettings() {
     const s = Store.data.settings;
     const reps = this.el("setReps"), gap = this.el("setGap"),
-      rate = this.el("setRate"), npd = this.el("setNewPerDay");
+      rate = this.el("setRate"), npd = this.el("setNewPerDay"),
+      vmode = this.el("setVoiceMode");
     reps.value = s.reps; gap.value = s.gap; rate.value = s.rate; npd.value = s.newPerDay;
+    vmode.value = s.voiceMode || "mix";
     const out = () => {
       this.el("repsOut").textContent = reps.value;
       this.el("gapOut").textContent = gap.value;
@@ -125,12 +127,17 @@ const Home = {
     const apply = () => {
       s.reps = +reps.value; s.gap = +gap.value; s.rate = +rate.value;
       s.newPerDay = Math.max(0, +npd.value || 0);
+      s.voiceMode = vmode.value;
       Store.data.settingsAt = Date.now();
       Store.save(); out();
     };
     reps.oninput = apply; gap.oninput = apply; rate.oninput = apply; npd.onchange = apply;
+    vmode.onchange = apply;
 
-    this.el("btnTestEn").onclick = () => TTS.speak("analysis", "en-US", s.rate);
+    this.el("btnTestEn").onclick = () => {
+      const v = TTS.enVoiceFor(this._testIdx = (this._testIdx || 0) + 1);
+      TTS.speak("analysis", "en-US", s.rate, v);
+    };
     this.el("btnTestVi").onclick = () => TTS.speak("phân tích", "vi-VN", 1);
 
     this.el("btnExport").onclick = () => {

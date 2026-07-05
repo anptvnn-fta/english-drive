@@ -30,7 +30,7 @@ const Learn = {
     this.el("bEx")  .textContent = w.ex;
     this.el("bExVi").textContent = w.xv;
     this.el("leftCount").textContent = this.queue.length - this.idx;
-    TTS.speak(w.w, "en-US", Store.data.settings.rate);
+    TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.idx));
   },
 
   flip() {
@@ -68,7 +68,7 @@ const Learn = {
     this.el("btnSayFront").onclick = e => {
       e.stopPropagation();
       const w = this.card();
-      if (w) TTS.speak(w.w, "en-US", Store.data.settings.rate);
+      if (w) TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.idx));
     };
     this.el("btnSayEx").onclick = e => {
       e.stopPropagation();

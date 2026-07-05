@@ -89,6 +89,13 @@
         <label>Từ mới tối đa mỗi ngày ở Flashcard (0 = không giới hạn)</label>
         <input type="number" id="setNewPerDay" min="0" max="100" step="1">
       </div>
+      <div class="setting">
+        <label>Giọng đọc tiếng Anh</label>
+        <select id="setVoiceMode">
+          <option value="mix">Trộn nhiều giọng (Mỹ, Anh, Úc…)</option>
+          <option value="single">Chỉ một giọng Mỹ</option>
+        </select>
+      </div>
     </div>
     <div class="settings-actions">
       <button class="btn" id="btnTestEn">🔊 Thử giọng Anh</button>
@@ -106,6 +113,10 @@
 <script src="data/level2.js"></script>
 <script src="data/level3.js"></script>
 <script src="data/level4.js"></script>
+<script src="data/ngsl1.js"></script>
+<script src="data/ngsl2.js"></script>
+<script src="data/ngsl3.js"></script>
+<script src="vendor/ts-fsrs.umd.js"></script>
 <script src="js/core.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/home.js"></script>

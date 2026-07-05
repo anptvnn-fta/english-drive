@@ -5,9 +5,12 @@
 /* ---------- Gộp từ điển theo lộ trình ---------- */
 const LEVELS = [
   { n: 1, name: "Nền tảng", desc: "Từ gốc cho người mới bắt đầu", arr: window.VOCAB_L1 || [] },
-  { n: 2, name: "Công việc & giao tiếp", desc: "Văn phòng, trao đổi hằng ngày", arr: window.VOCAB_L2 || [] },
-  { n: 3, name: "Dữ liệu cơ bản", desc: "Từ vựng dữ liệu dùng mỗi ngày", arr: window.VOCAB_L3 || [] },
-  { n: 4, name: "Dữ liệu nâng cao", desc: "Thống kê, máy học, kỹ thuật dữ liệu", arr: window.VOCAB_L4 || [] },
+  { n: 2, name: "Thông dụng 1", desc: "Từ hay gặp nhất theo chuẩn NGSL", arr: window.VOCAB_NGSL1 || [] },
+  { n: 3, name: "Công việc & giao tiếp", desc: "Văn phòng, trao đổi hằng ngày", arr: window.VOCAB_L2 || [] },
+  { n: 4, name: "Thông dụng 2", desc: "NGSL nhóm tần suất tiếp theo", arr: window.VOCAB_NGSL2 || [] },
+  { n: 5, name: "Dữ liệu cơ bản", desc: "Từ vựng dữ liệu dùng mỗi ngày", arr: window.VOCAB_L3 || [] },
+  { n: 6, name: "Thông dụng 3", desc: "NGSL hoàn thiện vốn 1.200 từ lõi", arr: window.VOCAB_NGSL3 || [] },
+  { n: 7, name: "Dữ liệu nâng cao", desc: "Thống kê, máy học, kỹ thuật dữ liệu", arr: window.VOCAB_L4 || [] },
 ];
 
 const VOCAB = (() => {
@@ -31,8 +34,8 @@ const Store = {
   data: null,
   defaults() {
     return {
-      settings: { reps: 4, gap: 7, rate: 0.9, newPerDay: 10 },
-      words: {},   // w -> {box, due, seen, ok, bad}
+      settings: { reps: 4, gap: 7, rate: 0.9, newPerDay: 10, voiceMode: "mix", shadow: false },
+      words: {},   // w -> {box, due, seen, ok, bad, fc?}  (fc = thẻ FSRS)
       log: {},     // 'YYYY-MM-DD' -> {new, review, car}
     };
   },
@@ -74,8 +77,24 @@ const Store = {
 };
 Store.load();
 
-/* ---------- SRS: hộp Leitner ---------- */
-const INTERVALS = [0, 1, 2, 4, 7, 15, 30, 60]; // ngày theo box 0..7
+/* ---------- SRS: FSRS v6 (ts-fsrs, MIT) với fallback Leitner ---------- */
+const INTERVALS = [0, 1, 2, 4, 7, 15, 30, 60]; // ngày theo box 0..7 (fallback + hiển thị)
+const FSRSLib = window.FSRS || null;
+const FScheduler = FSRSLib
+  ? FSRSLib.fsrs(FSRSLib.generatorParameters({
+      request_retention: 0.9,
+      maximum_interval: 180,
+      // bỏ bước học 1m/10m: app học theo phiên mỗi ngày, không canh đồng hồ phút
+      learning_steps: [],
+      relearning_steps: [],
+    }))
+  : null;
+
+// box "gương" từ stability của FSRS — dùng cho hiển thị lộ trình và merge đồng bộ
+function boxFromStability(s) {
+  return s < 1 ? 1 : s < 2 ? 2 : s < 4 ? 3 : s < 7 ? 4 : s < 15 ? 5 : s < 30 ? 6 : 7;
+}
+
 const SRS = {
   // g: 0 quên | 1 mơ hồ | 2 nhớ | 3 dễ
   grade(w, g) {
@@ -83,10 +102,33 @@ const SRS = {
     const wasNew = st.box === 0;
     const now = Date.now();
     st.seen++;
-    if (g === 0) { st.bad++; st.box = 1; st.due = now + 10 * 60000; }
-    else if (g === 1) { st.ok++; st.box = Math.max(1, st.box); st.due = now + Math.max(1, INTERVALS[st.box] * 0.5) * DAY; }
-    else if (g === 2) { st.ok++; st.box = Math.min(7, st.box + 1); st.due = now + INTERVALS[st.box] * DAY; }
-    else { st.ok++; st.box = Math.min(7, st.box + 2); st.due = now + INTERVALS[st.box] * DAY; }
+    if (g === 0) st.bad++; else st.ok++;
+    if (FScheduler) {
+      // di trú từ Leitner cũ: dựng thẻ FSRS tương đương lần đầu gặp
+      if (!st.fc && st.box > 0) {
+        const c = FSRSLib.createEmptyCard(new Date(now - INTERVALS[st.box] * DAY));
+        c.stability = Math.max(0.9, INTERVALS[st.box] * 0.9); // 0.9× để boxFromStability trả đúng box cũ
+        c.difficulty = 5;
+        c.state = FSRSLib.State.Review;
+        c.reps = st.seen;
+        c.last_review = new Date(now - INTERVALS[st.box] * DAY);
+        st.fc = c;
+      }
+      const card = st.fc || FSRSLib.createEmptyCard(new Date(now));
+      const rating = [FSRSLib.Rating.Again, FSRSLib.Rating.Hard, FSRSLib.Rating.Good, FSRSLib.Rating.Easy][g];
+      const rec = FScheduler.next(card, new Date(now), rating);
+      st.fc = rec.card;
+      st.due = new Date(rec.card.due).getTime();
+      if (g === 0) st.due = Math.min(st.due, now + 10 * 60000); // quên: gặp lại trong phiên
+      // box hiển thị: chỉ tin stability khi thẻ đã vào trạng thái Review ổn định
+      st.box = g === 0 ? 1 :
+        (rec.card.state === FSRSLib.State.Review ? boxFromStability(rec.card.stability) : 1);
+    } else {
+      if (g === 0) { st.box = 1; st.due = now + 10 * 60000; }
+      else if (g === 1) { st.box = Math.max(1, st.box); st.due = now + Math.max(1, INTERVALS[st.box] * 0.5) * DAY; }
+      else if (g === 2) { st.box = Math.min(7, st.box + 1); st.due = now + INTERVALS[st.box] * DAY; }
+      else { st.box = Math.min(7, st.box + 2); st.due = now + INTERVALS[st.box] * DAY; }
+    }
     Store.logInc(wasNew ? "new" : "review");
     Store.save();
   },
@@ -104,7 +146,17 @@ const SRS = {
       st.ok++;
       if (st.box === 0) { st.box = 1; st.due = Date.now() + DAY; Store.logInc("new"); return; }
       Store.logInc("review");
-    } else { st.bad++; st.due = Date.now(); Store.logInc("review"); }
+    } else {
+      st.bad++;
+      // trả lời sai trong game cũng phải ghi vào thẻ FSRS, không thì lịch ôn coi như chưa từng sai
+      if (FScheduler && st.fc) {
+        const rec = FScheduler.next(st.fc, new Date(), FSRSLib.Rating.Again);
+        st.fc = rec.card;
+        st.box = 1;
+      }
+      st.due = Date.now();
+      Store.logInc("review");
+    }
     Store.save();
   },
   dueWords() {
@@ -130,7 +182,7 @@ const SRS = {
 
 /* ---------- TTS: đọc tiếng Anh + tiếng Việt ---------- */
 const TTS = {
-  enVoice: null, viVoice: null, _cancelledAt: 0,
+  enVoice: null, viVoice: null, enVoices: [], _cancelledAt: 0,
   pick() {
     const vs = speechSynthesis.getVoices();
     const find = (pref) => {
@@ -143,13 +195,24 @@ const TTS = {
     };
     this.enVoice = find("en-us") || find("en");
     this.viVoice = find("vi");
+    // đa giọng: mỗi vùng lấy 1 giọng tốt nhất (Mỹ luôn đứng đầu)
+    this.enVoices = ["en-us", "en-gb", "en-au", "en-in"]
+      .map(find).filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i);
+    if (!this.enVoices.length && this.enVoice) this.enVoices = [this.enVoice];
+  },
+  /* Giọng tiếng Anh cho lượt đọc thứ n: chế độ mix xoay vòng, single luôn giọng Mỹ */
+  enVoiceFor(n) {
+    if (!this.enVoices.length) this.pick(); // giọng load muộn trên Android
+    if (Store.data.settings.voiceMode !== "mix" || this.enVoices.length < 2) return this.enVoice;
+    return this.enVoices[n % this.enVoices.length];
   },
   init() {
     if (!("speechSynthesis" in window)) return;
     this.pick();
     speechSynthesis.onvoiceschanged = () => this.pick();
   },
-  async speak(text, lang = "en-US", rate = 1) {
+  async speak(text, lang = "en-US", rate = 1, voice = null) {
     if (!("speechSynthesis" in window) || !text) return;
     // Chrome Android nuốt utterance được queue ngay sau cancel() (crbug 509488)
     const sinceCancel = Date.now() - this._cancelledAt;
@@ -158,12 +221,12 @@ const TTS = {
       const u = new SpeechSynthesisUtterance(text);
       u.lang = lang;
       // giọng có thể load muộn trên Android — thử chọn lại ngay trước khi đọc
-      let v = lang.startsWith("en") ? this.enVoice : this.viVoice;
+      let v = voice || (lang.startsWith("en") ? this.enVoice : this.viVoice);
       if (!v) {
         this.pick();
         v = lang.startsWith("en") ? this.enVoice : this.viVoice;
       }
-      if (v) u.voice = v;
+      if (v) { u.voice = v; u.lang = v.lang; } // lang phải khớp voice, Android mới chịu đổi chất giọng
       u.rate = rate;
       let done = false;
       const fin = () => { if (!done) { done = true; clearTimeout(t); resolve(); } };

@@ -232,6 +232,11 @@ body.car-body {
   background: var(--surface-2); border: 1px solid var(--line); transition: all 0.25s;
 }
 .rep-dots i.on { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 12px rgba(255,176,32,0.6); }
+.shadow-hint {
+  margin-top: 1.2vh; font-size: clamp(1.1rem, 3vw, 1.7rem);
+  color: var(--cyan); font-weight: 600; min-height: 1.4em;
+}
+.shadow-hint.good { color: var(--green); }
 
 .car-controls {
   flex: none; display: flex; align-items: center; justify-content: center; gap: 22px;

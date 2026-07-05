@@ -46,21 +46,21 @@ const Games = {
 
     if (this.game === "envi") {
       prompt.innerHTML = `<div class="quiz-word">${w.w}</div><div class="quiz-sub">/${w.i}/</div>`;
-      TTS.speak(w.w, "en-US", Store.data.settings.rate);
+      TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
       this.renderOptions(w, sample(this.pool, 3, w.w), x => x.v, x => x.w === w.w);
     } else if (this.game === "vien") {
       prompt.innerHTML = `<div class="quiz-vi-prompt">${w.v}</div>`;
       this.renderOptions(w, sample(this.pool, 3, w.w), x => `${x.w} <span class="mono muted" style="font-size:0.85em">/${x.i}/</span>`, x => x.w === w.w);
     } else if (this.game === "listen") {
       prompt.innerHTML = `<button class="speak-icon" style="font-size:2rem" id="btnHear">🔊 Nghe lại</button>`;
-      TTS.speak(w.w, "en-US", Store.data.settings.rate);
-      document.getElementById("btnHear").onclick = () => TTS.speak(w.w, "en-US", Store.data.settings.rate);
+      TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
+      document.getElementById("btnHear").onclick = () => TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
       this.renderOptions(w, sample(this.pool, 3, w.w), x => `${x.w} <span class="mono muted" style="font-size:0.85em">/${x.i}/</span>`, x => x.w === w.w);
     } else if (this.game === "spell") {
       prompt.innerHTML = `<div class="quiz-vi-prompt">${w.v}</div><div class="quiz-sub">/${w.i}/</div>
         <button class="speak-icon" id="btnHear" style="margin-top:8px">🔊 Nghe</button>`;
-      TTS.speak(w.w, "en-US", Store.data.settings.rate);
-      document.getElementById("btnHear").onclick = () => TTS.speak(w.w, "en-US", Store.data.settings.rate);
+      TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
+      document.getElementById("btnHear").onclick = () => TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
       opts.classList.add("hidden");
       this.renderSpell(w);
     }
@@ -148,7 +148,7 @@ const Games = {
     if (correct) {
       this.streak++;
       this.score += 10 + Math.min(this.streak - 1, 5) * 2;
-      TTS.speak(w.w, "en-US", Store.data.settings.rate);
+      TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
     } else {
       this.streak = 0;
     }

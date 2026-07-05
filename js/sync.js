@@ -89,12 +89,16 @@ const SYNC = {
       const s = remote.settings || {};
       const num = (v, min, max, dflt) =>
         (typeof v === "number" && isFinite(v) && v >= min && v <= max) ? v : dflt;
-      L.settings = {
+      // Object.assign để giữ nguyên tham chiếu settings mà các trang đã bind;
+      // trường nào bản remote không có (dữ liệu cũ) thì giữ giá trị local
+      Object.assign(L.settings, {
         reps: num(s.reps, 1, 10, L.settings.reps),
         gap: num(s.gap, 1, 30, L.settings.gap),
         rate: num(s.rate, 0.5, 2, L.settings.rate),
         newPerDay: num(s.newPerDay, 0, 200, L.settings.newPerDay),
-      };
+        voiceMode: (s.voiceMode === "single" || s.voiceMode === "mix") ? s.voiceMode : L.settings.voiceMode,
+        shadow: typeof s.shadow === "boolean" ? s.shadow : L.settings.shadow,
+      });
       L.settingsAt = remote.settingsAt;
       changed = true;
     }
