@@ -54,25 +54,30 @@ const prompt = (w) =>
   `One clear central visual metaphor, simple geometric shapes, soft muted colors, plain white background, ` +
   `no text, no letters, no words, no numbers. Educational icon style, centered, 1:1.`;
 
-async function genOne(w) {
+async function genOne(w, retry = 0) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": KEY },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt(w) }] }] }),
   });
+  if (res.status === 429 && retry < 4) { // dính rate limit: chờ lâu hơn rồi thử lại
+    await new Promise(r => setTimeout(r, 30000 * (retry + 1)));
+    return genOne(w, retry + 1);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   const parts = data?.candidates?.[0]?.content?.parts || [];
   const imgPart = parts.find(p => p.inlineData?.data);
   if (!imgPart) throw new Error("Không có ảnh trả về");
   const buf = Buffer.from(imgPart.inlineData.data, "base64");
+  const slug = w.w.replace(/[^a-z0-9]+/gi, "_"); // tên file an toàn cho URL (từ nhiều chữ có dấu cách)
   if (sharp) {
-    await sharp(buf).resize(512, 512, { fit: "contain", background: "#ffffff" }).webp({ quality: 80 }).toFile(path.join(IMG_DIR, w.w + ".webp"));
-    return "img/" + w.w + ".webp";
+    await sharp(buf).resize(512, 512, { fit: "contain", background: "#ffffff" }).webp({ quality: 80 }).toFile(path.join(IMG_DIR, slug + ".webp"));
+    return "img/" + slug + ".webp";
   } else {
-    fs.writeFileSync(path.join(IMG_DIR, w.w + ".png"), buf);
-    return "img/" + w.w + ".png";
+    fs.writeFileSync(path.join(IMG_DIR, slug + ".png"), buf);
+    return "img/" + slug + ".png";
   }
 }
 
@@ -88,7 +93,7 @@ for (const w of batch) {
   } catch (e) {
     failed.push(w.w + ": " + e.message);
   }
-  await sleep(31000); // ~2 ảnh/phút để không vượt rate limit bậc free
+  await sleep(12000); // ~5 ảnh/phút; có retry riêng cho 429
 }
 
 /* ---- ghi lại extras.js ---- */

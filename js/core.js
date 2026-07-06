@@ -256,7 +256,7 @@ function renderIllust(el, w, base) {
   if (!el) return;
   if (w && w.img) {
     el.className = base;
-    el.innerHTML = `<img src="${w.img}" alt="" loading="lazy">`;
+    el.innerHTML = `<img src="${w.img}" alt="" decoding="async">`; // không lazy: ảnh nhỏ, luôn trong tầm nhìn
   } else if (w && w.e) {
     el.className = base + " emoji";
     el.textContent = w.e;
