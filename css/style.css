@@ -144,6 +144,28 @@ input, select { font-family: inherit; }
 .mode b { font-size: 1.08rem; }
 .mode span { font-size: 0.86rem; color: var(--muted); }
 
+/* ---------- Bảng tiến độ chi tiết ---------- */
+.prog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.prog-stat { display: flex; flex-direction: column; gap: 2px; }
+.prog-stat b { font-size: 1.8rem; font-weight: 800; font-family: var(--font-mono); color: var(--amber); }
+.prog-stat span { font-size: 0.82rem; color: var(--muted); }
+.prog-block { margin-top: 18px; }
+.prog-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.04em; }
+.mastery-bar { display: flex; height: 18px; border-radius: 9px; overflow: hidden; background: var(--surface-2); }
+.mastery-bar i { display: block; }
+.m-fresh { background: var(--cyan); } .m-learning { background: var(--amber); } .m-mastered { background: var(--green); }
+.mastery-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 0.82rem; color: var(--muted); }
+.mastery-legend span { display: flex; align-items: center; gap: 6px; }
+.mastery-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.mini-bars { display: flex; align-items: flex-end; gap: 5px; height: 96px; }
+.mini-bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; }
+.mini-bar::before {
+  content: ""; width: 100%; min-height: 3px; height: var(--h); border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--amber), var(--amber-deep)); transition: height 0.5s;
+}
+.mini-bar.today::before { background: linear-gradient(180deg, var(--cyan), #2fa8b5); box-shadow: 0 0 10px var(--cyan-glow); }
+.mini-bar span { font-size: 0.68rem; color: var(--muted); font-family: var(--font-mono); }
+
 /* ---------- Roadmap ---------- */
 .level { margin-bottom: 14px; }
 .level-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }

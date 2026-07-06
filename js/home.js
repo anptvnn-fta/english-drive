@@ -42,6 +42,64 @@ const Home = {
     }
   },
 
+  renderProgress() {
+    const words = Store.data.words;
+    const now = Date.now();
+    const endToday = new Date(); endToday.setHours(23, 59, 59, 999);
+    const in7 = now + 7 * DAY;
+    let dueToday = 0, due7 = 0, ok = 0, bad = 0, learned = 0;
+    const mastery = { fresh: 0, learning: 0, mastered: 0 }; // box 1-2 | 3-4 | 5-7
+    for (const s of Object.values(words)) {
+      if (s.box > 0) {
+        learned++;
+        if (s.due <= endToday.getTime()) dueToday++;
+        if (s.due <= in7) due7++;
+        if (s.box <= 2) mastery.fresh++; else if (s.box <= 4) mastery.learning++; else mastery.mastered++;
+      }
+      ok += s.ok || 0; bad += s.bad || 0;
+    }
+    const acc = (ok + bad) ? Math.round(ok / (ok + bad) * 100) : 0;
+
+    // hoạt động 14 ngày gần nhất
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const row = Store.data.log[key] || { new: 0, review: 0, car: 0 };
+      days.push({ dom: d.getDate(), total: (row.new || 0) + (row.review || 0) + (row.car || 0), today: i === 0 });
+    }
+    const maxDay = Math.max(1, ...days.map(d => d.total));
+    const bars = days.map(d =>
+      `<div class="mini-bar${d.today ? " today" : ""}" title="${d.total} lượt" style="--h:${Math.round(d.total / maxDay * 100)}%"><span>${d.dom}</span></div>`
+    ).join("");
+
+    const seg = (n, cls) => n > 0 ? `<i class="${cls}" style="flex:${n}" title="${n} từ"></i>` : "";
+    const masteryBar = learned > 0
+      ? `<div class="mastery-bar">${seg(mastery.fresh, "m-fresh")}${seg(mastery.learning, "m-learning")}${seg(mastery.mastered, "m-mastered")}</div>`
+      : `<div class="muted" style="font-size:0.9rem">Chưa có từ nào — bắt đầu học để thấy tiến độ.</div>`;
+
+    this.el("progressPanel").innerHTML = `
+      <div class="prog-grid">
+        <div class="prog-stat"><b>${dueToday}</b><span>đến hạn hôm nay</span></div>
+        <div class="prog-stat"><b>${due7}</b><span>đến hạn trong 7 ngày</span></div>
+        <div class="prog-stat"><b>${acc}%</b><span>độ chính xác ôn tập</span></div>
+        <div class="prog-stat"><b>${learned}</b><span>từ đã vào lịch ôn</span></div>
+      </div>
+      <div class="prog-block">
+        <div class="prog-label">Mức độ thành thạo</div>
+        ${masteryBar}
+        <div class="mastery-legend">
+          <span><i class="m-fresh"></i> Mới học (${mastery.fresh})</span>
+          <span><i class="m-learning"></i> Đang nhớ (${mastery.learning})</span>
+          <span><i class="m-mastered"></i> Thành thạo (${mastery.mastered})</span>
+        </div>
+      </div>
+      <div class="prog-block">
+        <div class="prog-label">Hoạt động 14 ngày qua</div>
+        <div class="mini-bars">${bars}</div>
+      </div>`;
+  },
+
   renderSync() {
     const box = this.el("syncStatus");
     const code = SYNC.code;
@@ -176,6 +234,7 @@ const Home = {
 
   refresh() {
     this.renderStats();
+    this.renderProgress();
     this.renderRoadmap();
     this.renderSync();
   },
