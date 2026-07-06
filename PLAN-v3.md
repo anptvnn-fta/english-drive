@@ -138,9 +138,23 @@ Nghiên cứu web (WebSearch/agent-reach) trả lời CHÍNH XÁC, có dẫn ngu
 3. Output: bảng so sánh + khuyến nghị đích cụ thể (chứng chỉ nào, ngưỡng điểm nào, thi khoảng tháng nào)
   ghi vào mục này của PLAN. Số liệu phải từ nguồn chính thức, ghi ngày tra cứu.
 
-Định hướng đã thống nhất (điều chỉnh theo kết quả tra cứu):
-mốc 1 = TOEIC L&R sau ~6-9 tháng nếu NEU chấp nhận cho hệ từ xa; nếu quy chế đòi VSTEP → đích VSTEP B1
-(khả năng cao với hệ từ xa). Dài hạn (2-3 năm, mục tiêu giảng dạy bằng tiếng Anh): VSTEP C1 hoặc IELTS 6.5+.
+### KẾT QUẢ Phase 2 (tra cứu 06/07/2026, nguồn chính thức NEU + tổng hợp):
+
+**NEU siết chuẩn từ 1/10/2024 — chỉ nhận IELTS và TOEIC 4 KỸ NĂNG, BỎ VSTEP và TOEIC 2 kỹ năng.**
+- Đại trà (dạy tiếng Việt) = bậc B4: IELTS 5.5 HOẶC TOEIC 600 (Nghe-Đọc) + 270 (Nói-Viết).
+- Chất lượng cao/dạy tiếng Anh = B4: IELTS 6.0 / TOEIC 730 + 290.
+- Thi nội bộ NEU thay thế: ≥50/100, mỗi phần ≥30.
+- Hệ từ xa (E-NEU) áp dụng chuẩn đầu ra như các hệ (cel.neu.edu.vn).
+- CHƯA CHỐT: ngưỡng riêng cho hệ TỪ XA ngành TCNH (có thể là B1/bậc 3 thấp hơn B4) — file chi tiết ở Drive
+  thông báo cel.neu.edu.vn 25/03/2026; user cần tải hoặc gọi 0965010628 / eneu@neu.edu.vn để chốt.
+
+**Lộ trình khuyến nghị (CEFR: A0→B1 ~350-400h, →B2 thêm ~200h; nhịp 30-60'/ngày):**
+- Mốc đo đầu (tháng 6-9): TOEIC Nghe-Đọc (~1,4tr) làm thước đo — không phải đích tốt nghiệp.
+- Đích tốt nghiệp: TOEIC 4 kỹ năng 600+270 (~3,25tr, rẻ hơn IELTS, hợp cách học nghe-đọc).
+- Dài hạn (giảng dạy bằng tiếng Anh): IELTS 6.0-6.5.
+- TÁC ĐỘNG APP: bỏ ý tưởng VSTEP; Phase 3 ưu tiên bộ TOEIC (TSL); Phase 4 (luyện Nói-Viết) quan trọng hơn vì cả TOEIC 4 kỹ năng lẫn IELTS đều đòi Nói-Viết.
+
+Nguồn: onthiielts.com.vn/chuan-dau-ra-tieng-anh-neu, daotao.neu.edu.vn/vi/quy-dinh-chuan-dau-ra-ngoai-ngu, cel.neu.edu.vn.
 
 ---
 
