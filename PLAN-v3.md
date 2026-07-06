@@ -140,19 +140,19 @@ Nghiên cứu web (WebSearch/agent-reach) trả lời CHÍNH XÁC, có dẫn ngu
 
 ### KẾT QUẢ Phase 2 (tra cứu 06/07/2026, nguồn chính thức NEU + tổng hợp):
 
-**NEU siết chuẩn từ 1/10/2024 — chỉ nhận IELTS và TOEIC 4 KỸ NĂNG, BỎ VSTEP và TOEIC 2 kỹ năng.**
-- Đại trà (dạy tiếng Việt) = bậc B4: IELTS 5.5 HOẶC TOEIC 600 (Nghe-Đọc) + 270 (Nói-Viết).
-- Chất lượng cao/dạy tiếng Anh = B4: IELTS 6.0 / TOEIC 730 + 290.
+**XÁC NHẬN bằng bảng chính thức NEU (user gửi ảnh Phụ lục 2 + 2B). NEU bỏ VSTEP; chương trình chính quy học bằng tiếng Việt (hệ từ xa TCNH áp theo) = Bậc 4/B2. Bốn chứng chỉ được chấp nhận:**
+- **TOEFL ITP 500 — CHỈ Nghe + Ngữ pháp + Đọc, KHÔNG có Nói/Viết** (rẻ ~900k-1tr, nội địa).
+- TOEIC 4 kỹ năng: 600 (Nghe-Đọc) + 270 (Nói-Viết).
+- IELTS 5.5.
+- TOEFL iBT 46.
+- (CLC/POHE/dạy tiếng Anh = B4 cao hơn: IELTS 6.0/TOEIC 730+290/ITP 543/iBT 60. Ngôn ngữ Anh & tiên tiến = Bậc 5: IELTS 6.5.)
 - Thi nội bộ NEU thay thế: ≥50/100, mỗi phần ≥30.
-- Hệ từ xa (E-NEU) áp dụng chuẩn đầu ra như các hệ (cel.neu.edu.vn).
-- CHƯA CHỐT: ngưỡng riêng cho hệ TỪ XA ngành TCNH (có thể là B1/bậc 3 thấp hơn B4) — file chi tiết ở Drive
-  thông báo cel.neu.edu.vn 25/03/2026; user cần tải hoặc gọi 0965010628 / eneu@neu.edu.vn để chốt.
 
-**Lộ trình khuyến nghị (CEFR: A0→B1 ~350-400h, →B2 thêm ~200h; nhịp 30-60'/ngày):**
-- Mốc đo đầu (tháng 6-9): TOEIC Nghe-Đọc (~1,4tr) làm thước đo — không phải đích tốt nghiệp.
-- Đích tốt nghiệp: TOEIC 4 kỹ năng 600+270 (~3,25tr, rẻ hơn IELTS, hợp cách học nghe-đọc).
-- Dài hạn (giảng dạy bằng tiếng Anh): IELTS 6.0-6.5.
-- TÁC ĐỘNG APP: bỏ ý tưởng VSTEP; Phase 3 ưu tiên bộ TOEIC (TSL); Phase 4 (luyện Nói-Viết) quan trọng hơn vì cả TOEIC 4 kỹ năng lẫn IELTS đều đòi Nói-Viết.
+**LỘ TRÌNH KHUYẾN NGHỊ (đã tối ưu theo thế mạnh nghe-đọc của user):**
+- **Đích tốt nghiệp = TOEFL ITP 500** — con đường NGẮN NHẤT: né hoàn toàn Nói/Viết (2 kỹ năng user yếu), khớp đúng cách học nghe+đọc+từ vựng, rẻ nhất. TOEIC Nghe-Đọc dùng làm thước đo dọc đường.
+- **Dài hạn (giảng dạy bằng tiếng Anh) = IELTS 6.0-6.5** — lúc đó mới cần đầu tư Nói.
+- TÁC ĐỘNG APP: app hiện tại (nghe/đọc/từ vựng) phục vụ THẲNG TOEFL ITP — CHƯA cần Phase 4 (Nói-Viết) vội; để dành cho giai đoạn IELTS. Phase 3 (từ TCNH + TOEIC/TSL) vẫn hữu ích vì Reading TOEFL ITP + công việc cần vốn từ.
+- Còn nên xác nhận: hệ từ xa có dùng đúng Bậc 4 này hay thấp hơn Bậc 3 (gọi 0965010628/eneu@neu.edu.vn) — nếu thấp hơn thì càng nhẹ.
 
 Nguồn: onthiielts.com.vn/chuan-dau-ra-tieng-anh-neu, daotao.neu.edu.vn/vi/quy-dinh-chuan-dau-ra-ngoai-ngu, cel.neu.edu.vn.
 
