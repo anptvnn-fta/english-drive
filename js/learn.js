@@ -29,6 +29,10 @@ const Learn = {
     this.el("bVi")  .textContent = w.v;
     this.el("bEx")  .textContent = w.ex;
     this.el("bExVi").textContent = w.xv;
+    renderIllust(this.el("fIllust"), w, "flash-illust"); // hình mặt trước
+    const mn = this.el("bMnemonic");                     // câu liên tưởng mặt sau
+    if (w.m) { mn.textContent = "💡 " + w.m; mn.classList.remove("hidden"); }
+    else mn.classList.add("hidden");
     this.el("leftCount").textContent = this.queue.length - this.idx;
     TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.idx));
   },

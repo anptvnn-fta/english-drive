@@ -15,12 +15,15 @@ const LEVELS = [
 
 const VOCAB = (() => {
   const seen = new Set();
+  const extras = window.VOCAB_EXTRAS || {};
   const out = [];
   LEVELS.forEach(L => L.arr.forEach(x => {
     const key = x.w.toLowerCase().trim();
     if (seen.has(key)) return; // chống trùng giữa các level
     seen.add(key);
-    out.push({ ...x, w: key, l: L.n });
+    // gộp minh họa (e=emoji, img=ảnh, m=câu liên tưởng) — tùy chọn, không ghi đè trường gốc
+    const ex = extras[key] || {};
+    out.push({ ...x, w: key, l: L.n, e: ex.e || null, img: ex.img || null, m: ex.m || null });
   }));
   return out;
 })();
@@ -246,6 +249,23 @@ TTS.init();
 
 /* ---------- Tiện ích ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* Vẽ minh họa cho 1 từ vào phần tử el: ưu tiên ảnh, rồi emoji, không có thì ẩn.
+   base = class gốc theo ngữ cảnh (flash-illust / game-illust / car-illust). */
+function renderIllust(el, w, base) {
+  if (!el) return;
+  if (w && w.img) {
+    el.className = base;
+    el.innerHTML = `<img src="${w.img}" alt="" loading="lazy">`;
+  } else if (w && w.e) {
+    el.className = base + " emoji";
+    el.textContent = w.e;
+  } else {
+    el.className = base + " hidden";
+    el.textContent = "";
+  }
+}
+
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {

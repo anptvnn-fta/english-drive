@@ -204,6 +204,7 @@ body.car-body {
 .car-top .car-btn-sm:active { background: var(--surface-2); }
 
 .car-stage {
+  position: relative;
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 0 16px; gap: 1vh; min-height: 0; cursor: pointer;
 }
@@ -299,11 +300,12 @@ body.car-body {
 }
 .flash-inner {
   position: relative; width: 100%; min-height: 360px;
+  display: grid; /* hai mặt xếp chồng cùng ô lưới → chiều cao co theo mặt cao nhất */
   transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .flashcard.flipped .flash-inner { transform: rotateY(180deg); }
 .flash-face {
-  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   border-radius: var(--radius); border: 1px solid var(--line); padding: 34px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
   background: linear-gradient(180deg, var(--surface), var(--bg-deep)); text-align: center;
@@ -318,6 +320,28 @@ body.car-body {
 .flash-hint { color: var(--muted); font-size: 0.85rem; margin-top: 14px; }
 .speak-icon { font-size: 1.6rem; padding: 10px 16px; border-radius: 14px; border: 1px solid var(--line); }
 .speak-icon:active { background: var(--surface-2); }
+
+/* ---------- Minh họa từ vựng ---------- */
+.emoji, .flash-illust.emoji, .game-illust.emoji, .car-illust.emoji {
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+}
+.flash-illust { line-height: 1; margin-bottom: 4px; }
+.flash-illust.emoji { font-size: 4rem; }
+.flash-illust img { width: 96px; height: 96px; object-fit: contain; border-radius: 16px; background: var(--surface-2); }
+.flash-mnemonic {
+  margin-top: 12px; font-size: 0.95rem; line-height: 1.4;
+  color: var(--amber); background: var(--amber-glow);
+  border: 1px solid var(--amber-deep); border-radius: 12px; padding: 8px 14px; max-width: 34ch;
+}
+.flash-mnemonic b { color: var(--text); }
+.game-illust { line-height: 1; margin-bottom: 6px; }
+.game-illust.emoji { font-size: 3rem; }
+.game-illust img { width: 84px; height: 84px; object-fit: contain; border-radius: 12px; background: var(--surface-2); }
+.car-illust {
+  position: absolute; top: 6vh; right: 4vw; line-height: 1; opacity: 0.85; pointer-events: none;
+}
+.car-illust.emoji { font-size: clamp(2.2rem, 6vw, 4rem); }
+.car-illust img { width: clamp(52px, 11vw, 88px); height: clamp(52px, 11vw, 88px); object-fit: contain; border-radius: 14px; background: rgba(255,255,255,0.04); }
 
 .grade-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: min(620px, 100%); }
 .grade { padding: 16px 8px; border-radius: 14px; font-weight: 700; border: 1px solid var(--line); background: var(--surface); transition: transform 0.1s; }

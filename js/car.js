@@ -58,6 +58,7 @@ const Car = {
       el.classList.toggle("vlong", w.w.length > 16);
       this.el("wIpa").textContent = "/" + w.i + "/";
       this.el("wVi").textContent = w.v;
+      renderIllust(this.el("carIllust"), w, "car-illust"); // hình nhỏ góc phải, không che chữ
     }
     const pill = this.el("phasePill");
     const names = { learn: "HỌC TỪ", review: "ÔN LÔ NÀY", mega: "ÔN TẬP LỚN", passive: "NGHE THỤ ĐỘNG", idle: "TẠM DỪNG" };
