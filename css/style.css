@@ -255,6 +255,12 @@ body.car-body {
   background: var(--surface-2); border: 1px solid var(--line); transition: all 0.25s;
 }
 .rep-dots i.on { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 12px rgba(255,176,32,0.6); }
+/* thanh đếm ngược tới lần đọc kế */
+.gap-track { width: min(280px, 60vw); height: 5px; border-radius: 3px; background: var(--surface-2); margin-top: 1.4vh; overflow: hidden; }
+.gap-bar { width: 100%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--amber-deep), var(--amber)); transform: scaleX(0); transform-origin: left; }
+/* fade nhẹ khi chuyển từ mới */
+@keyframes wordIn { from { opacity: 0.15; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.car-stage.word-in .car-word, .car-stage.word-in .car-ipa, .car-stage.word-in .car-vi { animation: wordIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .shadow-hint {
   margin-top: 1.2vh; font-size: clamp(1.1rem, 3vw, 1.7rem);
   color: var(--cyan); font-weight: 600; min-height: 1.4em;

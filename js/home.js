@@ -206,6 +206,24 @@ const Home = {
       a.click();
       URL.revokeObjectURL(a.href);
     };
+    this.el("btnAnki").onclick = () => {
+      // TSV: cột 1 = mặt trước (từ), cột 2 = mặt sau (IPA · nghĩa · ví dụ · liên tưởng). <br> xuống dòng trong Anki.
+      const esc = s => (s || "").replace(/\t/g, " ").replace(/\r?\n/g, " ").trim();
+      const lines = VOCAB.map(w => {
+        const front = `${w.e ? w.e + " " : ""}${esc(w.w)}`;
+        const parts = [`/${esc(w.i)}/ · (${esc(w.p)}) ${esc(w.v)}`, esc(w.ex), esc(w.xv)];
+        if (w.m) parts.push("💡 " + esc(w.m));
+        return front + "\t" + parts.join("<br>");
+      });
+      const header = "#separator:tab\n#html:true\n";
+      const blob = new Blob([header + lines.join("\n")], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "engdrive-anki.txt";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast(`Đã xuất ${lines.length} thẻ — mở Anki, File → Import, chọn file này.`);
+    };
     this.el("btnImport").onclick = () => this.el("importFile").click();
     this.el("importFile").onchange = e => {
       const f = e.target.files[0];

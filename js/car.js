@@ -52,6 +52,14 @@ const Car = {
     const w = this.currentWord();
     if (w) {
       const el = this.el("wWord");
+      // fade nhẹ khi CHUYỂN sang từ mới (không fade mỗi lần lặp)
+      if (w.w !== this._lastWord) {
+        this._lastWord = w.w;
+        const stage = this.el("stage");
+        stage.classList.remove("word-in");
+        void stage.offsetWidth;
+        stage.classList.add("word-in");
+      }
       el.textContent = w.w;
       // từ/cụm dài thì co chữ lại để không bị ngắt giữa chữ
       el.classList.toggle("long", w.w.length > 10 && w.w.length <= 16);
@@ -88,6 +96,22 @@ const Car = {
     await TTS.speak(w.v.split(";")[0], "vi-VN", 1);
   },
 
+  /* Nghỉ giữa các lần lặp, đồng thời chạy thanh đếm ngược tới lần đọc kế */
+  async gapCountdown(ms, t) {
+    const bar = this.el("gapBar");
+    if (bar) {
+      bar.style.transition = "none";
+      bar.style.transform = "scaleX(1)";
+      // ép trình duyệt vẽ lại rồi mới bật transition co về 0
+      void bar.offsetWidth;
+      bar.style.transition = `transform ${ms}ms linear`;
+      bar.style.transform = "scaleX(0)";
+    }
+    await sleep(ms);
+    if (bar) { bar.style.transition = "none"; bar.style.transform = "scaleX(0)"; }
+    return this.ok(t);
+  },
+
   /* Học 1 từ: lặp reps lần, cách nhau gap giây — mỗi lượt một giọng nếu bật trộn giọng */
   async playWord(w, t) {
     const reps = this.s().reps;
@@ -96,7 +120,7 @@ const Car = {
       this.render();
       await this.speakPair(w, t, this.rep);
       if (!this.ok(t)) return false;
-      if (this.rep < reps - 1) await sleep(this.s().gap * 1000);
+      if (this.rep < reps - 1) { if (!await this.gapCountdown(this.s().gap * 1000, t)) return false; }
     }
     await sleep(1200);
     return this.ok(t);

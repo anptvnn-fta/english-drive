@@ -14,6 +14,25 @@ const Learn = {
     this.idx = 0;
   },
 
+  /* Ôn nhanh: gom ~15 từ RỦI RO QUÊN cao nhất (quá hạn nhiều + hay sai + box thấp) */
+  buildQuickQueue(limit = 15) {
+    const now = Date.now();
+    const scored = VOCAB
+      .filter(x => { const s = Store.data.words[x.w]; return s && s.box > 0; })
+      .map(x => {
+        const s = Store.data.words[x.w];
+        const overdue = Math.max(0, now - s.due) / DAY;          // số ngày quá hạn
+        const failRate = (s.bad || 0) / Math.max(1, s.seen || 1); // tỷ lệ sai
+        const lowBox = 8 - s.box;                                 // box thấp = mới nhớ
+        return { x, risk: overdue * 1.5 + failRate * 5 + lowBox * 0.6 };
+      })
+      .sort((a, b) => b.risk - a.risk)
+      .slice(0, limit)
+      .map(r => r.x);
+    this.queue = shuffle(scored);
+    this.idx = 0;
+  },
+
   card() { return this.queue[this.idx]; },
 
   show() {
@@ -64,7 +83,16 @@ const Learn = {
   },
 
   init() {
-    this.buildQueue();
+    this.quick = /quick/.test(location.search + location.hash); // hash bền hơn query khi server dùng URL sạch
+    if (this.quick) {
+      this.buildQuickQueue();
+      const head = document.querySelector(".study-head h2");
+      if (head) head.textContent = "⚡ Ôn nhanh — từ sắp quên nhất";
+      const more = this.el("btnMore");
+      if (more) more.textContent = "Ôn nhanh lượt nữa";
+    } else {
+      this.buildQueue();
+    }
     this.el("flashcard").onclick = e => {
       if (e.target.closest("button")) return;
       this.flip();
@@ -83,9 +111,10 @@ const Learn = {
       b.onclick = () => this.grade(+b.dataset.g);
     });
     this.el("btnMore").onclick = () => {
-      this.buildQueue(10);
+      if (this.quick) { this.buildQuickQueue(); }
+      else { this.buildQueue(10); }
       if (!this.queue.length) {
-        return toast("Anh đã học hết từ hiện có — quay lại hôm sau để ôn định kỳ nhé!");
+        return toast(this.quick ? "Không còn từ rủi ro nào — anh đang nhớ tốt!" : "Anh đã học hết từ hiện có — quay lại hôm sau để ôn định kỳ nhé!");
       }
       this.el("flashZone").classList.remove("hidden");
       this.el("donePanel").classList.add("hidden");
