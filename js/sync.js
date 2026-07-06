@@ -98,6 +98,7 @@ const SYNC = {
         newPerDay: num(s.newPerDay, 0, 200, L.settings.newPerDay),
         voiceMode: (s.voiceMode === "single" || s.voiceMode === "mix") ? s.voiceMode : L.settings.voiceMode,
         shadow: typeof s.shadow === "boolean" ? s.shadow : L.settings.shadow,
+        mode: (s.mode === "listen" || s.mode === "vocab") ? s.mode : L.settings.mode,
       });
       L.settingsAt = remote.settingsAt;
       changed = true;

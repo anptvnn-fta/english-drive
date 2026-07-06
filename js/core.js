@@ -11,6 +11,8 @@ const LEVELS = [
   { n: 5, name: "Dữ liệu cơ bản", desc: "Từ vựng dữ liệu dùng mỗi ngày", arr: window.VOCAB_L3 || [] },
   { n: 6, name: "Thông dụng 3", desc: "NGSL hoàn thiện vốn 1.200 từ lõi", arr: window.VOCAB_NGSL3 || [] },
   { n: 7, name: "Dữ liệu nâng cao", desc: "Thống kê, máy học, kỹ thuật dữ liệu", arr: window.VOCAB_L4 || [] },
+  { n: 8, name: "Tài chính – Ngân hàng", desc: "Ngân hàng, tín dụng, đầu tư, kế toán", arr: window.VOCAB_FIN || [] },
+  { n: 9, name: "Kinh doanh & TOEIC", desc: "Văn phòng, hợp đồng, thương mại (luyện TOEIC/TOEFL)", arr: window.VOCAB_BIZ || [] },
 ];
 
 const VOCAB = (() => {
@@ -37,7 +39,7 @@ const Store = {
   data: null,
   defaults() {
     return {
-      settings: { reps: 4, gap: 7, rate: 0.9, newPerDay: 10, voiceMode: "mix", shadow: false },
+      settings: { reps: 4, gap: 7, rate: 0.9, newPerDay: 10, voiceMode: "mix", shadow: false, mode: "vocab" },
       words: {},   // w -> {box, due, seen, ok, bad, fc?}  (fc = thẻ FSRS)
       log: {},     // 'YYYY-MM-DD' -> {new, review, car}
     };
