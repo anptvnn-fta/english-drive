@@ -7,20 +7,25 @@ const Games = {
   el(id) { return document.getElementById(id); },
 
   buildPool() {
-    // ưu tiên từ đã gặp; chưa đủ 12 thì lấy thêm từ đầu lộ trình
-    let pool = SRS.learnedWords();
-    if (pool.length < 12) {
-      const have = new Set(pool.map(x => x.w));
-      pool = pool.concat(VOCAB.filter(x => !have.has(x.w)).slice(0, 20 - pool.length));
+    // Chỉ HỎI về từ đã học (this.pool); từ chưa học chỉ dùng làm đáp án nhiễu (this.wrongsPool)
+    const learned = SRS.learnedWords();
+    this.pool = learned;
+    let wrongs = learned.slice();
+    if (wrongs.length < 12) {
+      const have = new Set(learned.map(x => x.w));
+      wrongs = wrongs.concat(VOCAB.filter(x => !have.has(x.w)).slice(0, 20 - wrongs.length));
     }
-    this.pool = pool;
+    this.wrongsPool = wrongs;
   },
 
   start(game) {
     this.game = game;
     this.score = 0; this.streak = 0; this.qi = 0;
-    this.questions = shuffle(this.pool).slice(0, 10);
-    if (this.questions.length < 4) return toast("Chưa đủ từ để chơi — học vài từ trước đã!");
+    // Trò xếp chữ: bỏ từ/cụm dài (>14 ký tự) để không tràn màn hình điện thoại nhỏ
+    this.questions = game === "spell"
+      ? shuffle(this.pool.filter(x => x.w.length <= 14)).slice(0, 10)
+      : shuffle(this.pool).slice(0, 10);
+    if (this.pool.length < 4) return toast("Chưa đủ từ để chơi — học vài từ trước đã!");
     this.el("gamePick").classList.add("hidden");
     this.el("gameDone").classList.add("hidden");
     this.el("gameZone").classList.remove("hidden");
@@ -48,15 +53,15 @@ const Games = {
       prompt.innerHTML = `<div class="game-illust hidden" id="gIllust"></div><div class="quiz-word">${w.w}</div><div class="quiz-sub">/${w.i}/</div>`;
       renderIllust(document.getElementById("gIllust"), w, "game-illust");
       TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
-      this.renderOptions(w, sample(this.pool, 3, w.w), x => x.v, x => x.w === w.w);
+      this.renderOptions(w, sample(this.wrongsPool, 3, w.w), x => x.v, x => x.w === w.w);
     } else if (this.game === "vien") {
       prompt.innerHTML = `<div class="quiz-vi-prompt">${w.v}</div>`;
-      this.renderOptions(w, sample(this.pool, 3, w.w), x => `${x.w} <span class="mono muted" style="font-size:0.85em">/${x.i}/</span>`, x => x.w === w.w);
+      this.renderOptions(w, sample(this.wrongsPool, 3, w.w), x => `${x.w} <span class="mono muted" style="font-size:0.85em">/${x.i}/</span>`, x => x.w === w.w);
     } else if (this.game === "listen") {
       prompt.innerHTML = `<button class="speak-icon" style="font-size:2rem" id="btnHear">🔊 Nghe lại</button>`;
       TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
       document.getElementById("btnHear").onclick = () => TTS.speak(w.w, "en-US", Store.data.settings.rate, TTS.enVoiceFor(this.qi));
-      this.renderOptions(w, sample(this.pool, 3, w.w), x => `${x.w} <span class="mono muted" style="font-size:0.85em">/${x.i}/</span>`, x => x.w === w.w);
+      this.renderOptions(w, sample(this.wrongsPool, 3, w.w), x => `${x.w} <span class="mono muted" style="font-size:0.85em">/${x.i}/</span>`, x => x.w === w.w);
     } else if (this.game === "spell") {
       prompt.innerHTML = `<div class="game-illust hidden" id="gIllust"></div><div class="quiz-vi-prompt">${w.v}</div><div class="quiz-sub">/${w.i}/</div>
         <button class="speak-icon" id="btnHear" style="margin-top:8px">🔊 Nghe</button>`;

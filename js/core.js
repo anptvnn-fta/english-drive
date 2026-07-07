@@ -42,18 +42,41 @@ const Store = {
       settings: { reps: 4, gap: 7, rate: 0.9, newPerDay: 10, voiceMode: "mix", shadow: false, mode: "vocab" },
       words: {},   // w -> {box, due, seen, ok, bad, fc?}  (fc = thẻ FSRS)
       log: {},     // 'YYYY-MM-DD' -> {new, review, car}
+      dialogs: { seen: 0 }, // luyện tai: tổng số câu đã nghe (bền qua các phiên)
     };
   },
   load() {
     try {
       this.data = { ...this.defaults(), ...JSON.parse(localStorage.getItem(this.key) || "{}") };
       this.data.settings = { ...this.defaults().settings, ...this.data.settings };
+      if (!this.data.dialogs) this.data.dialogs = { seen: 0 };
     } catch { this.data = this.defaults(); }
+    this.pruneLog();
     return this.data;
   },
+  pruneLog() {
+    // giữ tối đa 90 ngày log gần nhất — tránh localStorage phình vô hạn theo năm tháng
+    const keys = Object.keys(this.data.log || {});
+    if (keys.length <= 90) return;
+    keys.sort(); // 'YYYY-MM-DD' sắp theo thứ tự thời gian
+    for (const k of keys.slice(0, keys.length - 90)) delete this.data.log[k];
+  },
+  _quotaWarned: false,
   save() {
-    localStorage.setItem(this.key, JSON.stringify(this.data));
-    if (window.SYNC) SYNC.markDirty();
+    try {
+      localStorage.setItem(this.key, JSON.stringify(this.data));
+      if (window.SYNC) SYNC.markDirty();
+    } catch (e) {
+      if (e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED") {
+        console.error("localStorage đầy — không lưu được tiến độ", e);
+        // báo 1 lần, không spam mỗi lần save
+        if (!this._quotaWarned) {
+          this._quotaWarned = true;
+          if (typeof toast === "function") toast("Bộ nhớ trình duyệt đầy — tiến độ không lưu được. Xóa bớt cache/dữ liệu trang khác.");
+        }
+        // không gọi markDirty vì save không thành công
+      } else { throw e; }
+    }
   },
   st(w) {
     return this.data.words[w] || (this.data.words[w] = { box: 0, due: 0, seen: 0, ok: 0, bad: 0 });
@@ -140,7 +163,11 @@ const SRS = {
   carSeen(w) {
     const st = Store.st(w);
     st.seen++;
-    if (st.box === 0) { st.box = 1; st.due = Date.now() + DAY; Store.logInc("new"); }
+    if (st.box === 0) {
+      st.box = 1; st.due = Date.now() + DAY; Store.logInc("new");
+      // khởi tạo thẻ FSRS trạng thái New để flashcard xử lý đúng (không dựng thẻ Review giả khi migrate)
+      if (FScheduler && !st.fc) st.fc = FSRSLib.createEmptyCard(new Date());
+    }
     else { st.due = Math.max(st.due, Date.now() + DAY); Store.logInc("car"); } // nghe lại trên xe: dời hạn ôn 1 ngày, chấm điểm thật ở flashcard
     Store.save();
   },
@@ -151,7 +178,15 @@ const SRS = {
       st.ok++;
       if (st.box === 0) { st.box = 1; st.due = Date.now() + DAY; Store.logInc("new"); return; }
       Store.logInc("review");
+      // trả lời đúng trong game cũng đẩy lịch FSRS — chỉ khi từ đã đến hạn, để không lấn flashcard
+      if (FScheduler && st.fc && st.due <= Date.now()) {
+        const rec = FScheduler.next(st.fc, new Date(), FSRSLib.Rating.Good);
+        st.fc = rec.card;
+        st.due = new Date(rec.card.due).getTime();
+        if (rec.card.state === FSRSLib.State.Review) st.box = boxFromStability(rec.card.stability);
+      }
     } else {
+      const wasNew = st.box === 0; // chốt trước khi FSRS có thể đẩy box lên 1
       st.bad++;
       // trả lời sai trong game cũng phải ghi vào thẻ FSRS, không thì lịch ôn coi như chưa từng sai
       if (FScheduler && st.fc) {
@@ -160,7 +195,7 @@ const SRS = {
         st.box = 1;
       }
       st.due = Date.now();
-      Store.logInc("review");
+      Store.logInc(wasNew ? "new" : "review");
     }
     Store.save();
   },
@@ -170,6 +205,7 @@ const SRS = {
       .sort((a, b) => Store.st(a.w).due - Store.st(b.w).due);
   },
   newWords(limit) {
+    if (limit <= 0) return []; // 0/âm = không lấy từ mới (vd newPerDay=0: tạm dừng)
     const out = [];
     for (const x of VOCAB) {
       const s = Store.data.words[x.w];

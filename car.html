@@ -8,7 +8,8 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="car-body">
@@ -18,7 +19,7 @@
 <div class="car-top">
   <button class="car-btn-sm" id="btnHome" title="Trang chủ">⌂</button>
   <div class="phase learn" id="phasePill">SẴN SÀNG</div>
-  <div class="mono muted" id="todayInfo"></div>
+  <div class="mono muted today-info" id="todayInfo"></div>
   <button class="car-btn-sm" id="btnDrawer" title="Cài đặt">⚙</button>
 </div>
 
@@ -108,11 +109,12 @@
 <script src="data/ngsl3.js"></script>
 <script src="data/finance.js"></script>
 <script src="data/business.js"></script>
-<script src="data/dialogs.js"></script>
+<!-- data/dialogs.js nạp động khi vào chế độ Luyện tai (xem Car.ensureDialogs) -->
 <script src="data/extras.js"></script>
 <script src="vendor/ts-fsrs.umd.js"></script>
 <script src="js/core.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/car.js"></script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>
 </html>

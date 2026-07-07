@@ -3,3 +3,4 @@ node_modules/
 tmp/
 package.json
 package-lock.json
+AUDIT-2026-07.md

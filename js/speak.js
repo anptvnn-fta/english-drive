@@ -5,6 +5,7 @@ const Speak = {
   rec: null, listening: false,
 
   el(id) { return document.getElementById(id); },
+  esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); },
 
   buildQueue() {
     // ưu tiên từ học gần đây (đã gặp), thiếu thì lấy đầu lộ trình
@@ -49,15 +50,15 @@ const Speak = {
     if (best >= 0.8) {
       this.passed++;
       this.el("passCount").textContent = this.passed;
-      res.innerHTML = `<div class="verdict good">✓ Chuẩn rồi!</div><div class="heard">Web nghe được: <b>${heard}</b></div>`;
+      res.innerHTML = `<div class="verdict good">✓ Chuẩn rồi!</div><div class="heard">Web nghe được: <b>${this.esc(heard)}</b></div>`;
       this.el("btnNext").classList.remove("hidden");
       SRS.quizResult(this.word().w, true);
     } else if (best >= 0.55) {
       res.innerHTML = `<div class="verdict close">Gần đúng — thử lại nhé</div>
-        <div class="heard">Web nghe thành: <b>${heard || "(không rõ)"}</b></div>`;
+        <div class="heard">Web nghe thành: <b>${this.esc(heard) || "(không rõ)"}</b></div>`;
     } else {
       res.innerHTML = `<div class="verdict bad">Chưa đúng</div>
-        <div class="heard">Web nghe thành: <b>${heard || "(không rõ)"}</b> — nghe mẫu rồi đọc lại</div>`;
+        <div class="heard">Web nghe thành: <b>${this.esc(heard) || "(không rõ)"}</b> — nghe mẫu rồi đọc lại</div>`;
     }
   },
 
@@ -88,6 +89,13 @@ const Speak = {
     };
   },
 
+  stopRec() {
+    // hủy nhận diện đang chạy khi chuyển từ, tránh chấm transcript cũ sang từ mới
+    if (this.rec && this.listening) {
+      try { this.rec.abort(); } catch {} // onend sẽ tự set listening=false
+    }
+  },
+
   listen() {
     if (!this.rec || this.listening) return;
     TTS.stop();
@@ -103,12 +111,13 @@ const Speak = {
   },
 
   next() {
+    this.stopRec(); // dừng nhận diện cũ trước khi chuyển từ
     this.idx++;
     this.show();
   },
 
   finish() {
-    document.querySelector(".flash-zone").classList.add("hidden");
+    this.el("speakZone").classList.add("hidden");
     this.el("donePanel").classList.remove("hidden");
     this.el("doneStats").textContent =
       `Đạt ${this.passed}/${this.queue.length} từ. Luyện đều mỗi tuần vài lần là lên nhanh.`;
@@ -126,7 +135,8 @@ const Speak = {
     this.el("btnSkip").onclick = () => this.next();
     this.el("btnNext").onclick = () => this.next();
     this.el("btnAgain").onclick = () => {
-      document.querySelector(".flash-zone").classList.remove("hidden");
+      this.stopRec(); // dừng nhận diện nếu đang nghe
+      this.el("speakZone").classList.remove("hidden");
       this.el("donePanel").classList.add("hidden");
       this.buildQueue();
       this.show();

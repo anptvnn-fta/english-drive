@@ -30,7 +30,7 @@ window.VOCAB_L3 = [
   {w:"calculate", p:"v", i:"ˈkælkjəleɪt", v:"tính toán; tính", ex:"Calculate the sum of all transactions.", xv:"Tính tổng của tất cả các giao dịch.", t:"Phân tích"},
   {w:"estimate", p:"v", i:"ˈɛstɪmeɪt", v:"ước tính; ước lượng", ex:"Estimate the missing values using averages.", xv:"Ước tính các giá trị thiếu bằng giá trị trung bình.", t:"Phân tích"},
   {w:"summary", p:"n", i:"ˈsʌməri", v:"bản tóm tắt; tổng hợp", ex:"The summary table covers all key metrics.", xv:"Bảng tóm tắt bao gồm tất cả chỉ số chính.", t:"Phân tích"},
-  {w:"insight", p:"n", i:"ˈɪnsaɪt", v:"nhận thức sâu sắc; phát hiện giá trị", ex:"The data gives useful insights about customers.", xv:"Dữ liệu cung cấp những nhận thức hữu ích về khách hàng.", t:"Phân tích"},
+  {w:"insight", p:"n", i:"ˈɪnsaɪt", v:"phát hiện quan trọng; sự hiểu biết sâu", ex:"The data gives useful insights about customers.", xv:"Dữ liệu cho những phát hiện hữu ích về khách hàng.", t:"Phân tích"},
   {w:"pattern", p:"n", i:"ˈpætərn", v:"mô hình; quy luật", ex:"A clear pattern appears in the dataset.", xv:"Một quy luật rõ ràng xuất hiện trong tập dữ liệu.", t:"Phân tích"},
   {w:"metric", p:"n", i:"ˈmɛtrɪk", v:"chỉ số đo lường", ex:"Track each metric on the dashboard daily.", xv:"Theo dõi từng chỉ số trên bảng điều khiển hàng ngày.", t:"Phân tích"},
   {w:"increase", p:"v", i:"ɪnˈkriːs", v:"tăng; tăng lên", ex:"Sales increase significantly in December.", xv:"Doanh số tăng đáng kể vào tháng Mười hai.", t:"Phân tích"},

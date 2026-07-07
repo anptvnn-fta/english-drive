@@ -72,9 +72,16 @@ const SYNC = {
     for (const [w, r] of Object.entries(remote.words || {})) {
       const l = L.words[w];
       if (!l) { L.words[w] = r; changed = true; continue; }
-      // box (tiến độ SRS) quan trọng nhất, rồi tới hạn ôn xa hơn; seen chỉ để phân định cuối
+      // box (tiến độ SRS) quan trọng nhất; box bằng nhau thì ưu tiên stability (thước đo bộ nhớ
+      // FSRS trực tiếp), rồi tới hạn ôn xa hơn, cuối cùng seen. Bên chưa có fc coi như stability -1.
+      const rStab = r.fc?.stability ?? -1;
+      const lStab = l.fc?.stability ?? -1;
       const better = r.box > l.box ||
-        (r.box === l.box && (r.due > l.due || (r.due === l.due && r.seen > l.seen)));
+        (r.box === l.box && (
+          rStab > lStab ||
+          (rStab === lStab && r.due > l.due) ||
+          (rStab === lStab && r.due === l.due && r.seen > l.seen)
+        ));
       if (better) { L.words[w] = r; changed = true; }
     }
     for (const [d, row] of Object.entries(remote.log || {})) {
@@ -138,9 +145,15 @@ const SYNC = {
   async init(onMerged) {
     window.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden" && this.dirty) {
-        this.push(true).catch(() => {});
+        // bảo tồn cục bộ trước — không phụ thuộc keepalive thành công
+        try { localStorage.setItem(Store.key, JSON.stringify(Store.data)); } catch {}
+        // keepalive bị trình duyệt bỏ nếu payload >64KB → chỉ dùng khi payload nhỏ;
+        // payload lớn: vẫn dirty, lần mở tab sau hoặc từ kế tiếp sẽ push() bình thường
+        if (JSON.stringify(Store.data).length < 50000) this.push(true).catch(() => {});
       }
     });
+    // mạng trở lại: thử đẩy phần còn nợ
+    window.addEventListener("online", () => { if (this.dirty) this.push().then(() => this._set("ok")).catch(() => {}); });
     if (!this.code) { this._set("off"); return; }
     this._set("syncing");
     try {

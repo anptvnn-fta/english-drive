@@ -8,7 +8,8 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -52,17 +53,20 @@
         </div>
       </div>
     </div>
+    <div id="gradeHint" style="text-align:center;color:var(--muted);font-size:0.85rem;margin:8px 0 2px">
+      Chọn theo mức độ thực sự nhớ — thành thật giúp lịch ôn chính xác hơn.
+    </div>
     <div class="grade-row hidden" id="gradeRow">
-      <button class="grade g0" data-g="0">Quên<small>ôn lại 10 phút</small></button>
-      <button class="grade g1" data-g="1">Mơ hồ<small>ôn lại mai</small></button>
-      <button class="grade g2" data-g="2">Nhớ<small>giãn lịch ôn</small></button>
-      <button class="grade g3" data-g="3">Quá dễ<small>giãn xa hơn</small></button>
+      <button class="grade g0" data-g="0" title="Không nhớ — sẽ gặp lại ngay trong phiên">Quên<small>ôn lại 10 phút</small></button>
+      <button class="grade g1" data-g="1" title="Nhớ nhưng còn lưỡng lự, phải nghĩ mới ra">Mơ hồ<small>ôn lại mai</small></button>
+      <button class="grade g2" data-g="2" title="Nhớ ngay, không cần suy nghĩ">Nhớ<small>giãn lịch ôn</small></button>
+      <button class="grade g3" data-g="3" title="Quá quen, biết từ trước khi học">Quá dễ<small>giãn xa hơn</small></button>
     </div>
   </div>
 
   <div class="done-panel hidden" id="donePanel">
     <div class="big">🎉</div>
-    <h2>Xong phiên hôm nay!</h2>
+    <h2 id="doneTitle">Xong phiên hôm nay!</h2>
     <p class="muted" id="doneStats"></p>
     <p style="margin-top:16px">
       <a class="btn btn-amber" href="games.html">🎮 Chơi 1 vòng cho chắc</a>
@@ -86,5 +90,6 @@
 <script src="js/core.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/learn.js"></script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>
 </html>

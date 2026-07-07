@@ -5,9 +5,12 @@ const Learn = {
   el(id) { return document.getElementById(id); },
 
   buildQueue(extraNew = 0) {
-    const due = SRS.dueWords();
     const npd = Store.data.settings.newPerDay;
-    let newCount = npd === 0 ? 10 : Math.max(0, npd - Store.todayLog().new);
+    // giới hạn từ đến hạn mỗi phiên — tránh queue vài trăm từ gây kiệt sức sau kỳ nghỉ dài
+    const maxDue = Math.max(npd * 3, 30);
+    const due = SRS.dueWords().slice(0, maxDue);
+    // newPerDay=0: tạm dừng học từ mới hôm nay (mặc định 10, xem Store.defaults())
+    let newCount = Math.max(0, npd - Store.todayLog().new);
     newCount += extraNew;
     const news = SRS.newWords(newCount);
     this.queue = [...due, ...news];
@@ -66,6 +69,7 @@ const Learn = {
   grade(g) {
     const w = this.card();
     if (!w) return;
+    if (this.graded === 0) { const h = this.el("gradeHint"); if (h) h.style.display = "none"; } // ẩn gợi ý sau lần chấm đầu
     SRS.grade(w.w, g);
     this.graded++;
     if (g >= 2) this.correct++;
@@ -77,9 +81,28 @@ const Learn = {
   finish() {
     this.el("flashZone").classList.add("hidden");
     this.el("donePanel").classList.remove("hidden");
-    this.el("doneStats").textContent =
-      `Anh vừa ôn ${this.graded} thẻ, nhớ ngay ${this.correct} thẻ. ` +
-      `Tổng cộng đã học ${SRS.learnedWords().length}/${VOCAB.length} từ.`;
+    const title = this.el("doneTitle"), stats = this.el("doneStats");
+    if (this.graded > 0) {
+      if (title) title.textContent = "Xong phiên hôm nay!";
+      stats.textContent =
+        `Anh vừa ôn ${this.graded} thẻ, nhớ ngay ${this.correct} thẻ. ` +
+        `Tổng cộng đã học ${SRS.learnedWords().length}/${VOCAB.length} từ.`;
+      return;
+    }
+    // queue rỗng ngay từ đầu — giải thích lý do thay vì hiện "ôn 0 thẻ"
+    if (this.quick) {
+      if (title) title.textContent = "Chưa có gì để ôn nhanh";
+      stats.textContent = "Anh chưa học từ nào — vào Flashcard học vài từ trước, rồi quay lại Ôn nhanh nhé!";
+    } else {
+      const npd = Store.data.settings.newPerDay, todayNew = Store.todayLog().new;
+      if (title) title.textContent = "Chưa có từ cần ôn";
+      if (npd === 0)
+        stats.textContent = "Đang tạm dừng học từ mới (đặt 0 ở Trang chủ) và không có từ đến hạn. Chỉnh lại số từ mới nếu muốn học tiếp.";
+      else if (todayNew >= npd)
+        stats.textContent = `Anh đã học đủ ${npd} từ mới hôm nay. Mai quay lại tiếp, hoặc nhấn "Học thêm" bên dưới.`;
+      else
+        stats.textContent = 'Không có từ đến hạn ôn — anh đang nhớ tốt. Nhấn "Học thêm" để học từ mới, hoặc quay lại ngày mai.';
+    }
   },
 
   init() {
@@ -116,6 +139,7 @@ const Learn = {
       if (!this.queue.length) {
         return toast(this.quick ? "Không còn từ rủi ro nào — anh đang nhớ tốt!" : "Anh đã học hết từ hiện có — quay lại hôm sau để ôn định kỳ nhé!");
       }
+      this.graded = 0; this.correct = 0; // lượt mới: đếm lại từ đầu, không dồn qua lượt trước
       this.el("flashZone").classList.remove("hidden");
       this.el("donePanel").classList.add("hidden");
       this.show();

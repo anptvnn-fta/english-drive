@@ -20,6 +20,7 @@ const Car = {
   countNew: 0, countReview: 0,
   mode: "vocab",        // vocab | listen (luyện tai hỏi-đáp)
   dlgDeck: [], dlgCur: null, dlgSeen: 0, _repeat: false,
+  _learnedCount: null,  // cache số từ đã học cho thanh tiến độ (tránh quét 1400 từ mỗi lần vẽ)
 
   el(id) { return document.getElementById(id); },
 
@@ -87,8 +88,8 @@ const Car = {
       (this.phase === "learn" || this.phase === "review" ? ` · lô ${this.batchNo + 1}, từ ${Math.min(this.wi + 1, this.batch.length)}/${this.batch.length}` : "");
 
     const total = VOCAB.length || 1;
-    const learned = SRS.learnedWords().length;
-    this.el("progressBar").style.width = (learned / total * 100).toFixed(1) + "%";
+    if (this._learnedCount == null) this._learnedCount = SRS.learnedWords().length; // tính lại chỉ khi cache bị xoá
+    this.el("progressBar").style.width = (this._learnedCount / total * 100).toFixed(1) + "%";
   },
 
   async speakPair(w, t, voiceIdx = 0) {
@@ -227,6 +228,7 @@ const Car = {
       this.passive = shuffle(this.sessionWords.length ? this.sessionWords : SRS.learnedWords());
       if (!this.passive.length) this.passive = VOCAB.slice(0, 20);
       if (!this.passive.length) { this.phase = "idle"; this.pause(); return; } // không có dữ liệu
+      if (typeof toast === "function") toast("Đã hết từ mới — chuyển sang nghe lại thụ động để nhớ sâu hơn.");
     } else {
       this.phase = "learn";
     }
@@ -238,6 +240,7 @@ const Car = {
     ["wWord", "wIpa", "wVi", "dots", "carIllust"].forEach(id => this.el(id).classList.toggle("hidden", listen));
     this.el("listenBlock").classList.toggle("hidden", !listen);
     this.el("btnPrev").title = listen ? "Nhắc lại" : "Từ trước";
+    this.el("btnPrev").textContent = listen ? "↺" : "⏮"; // ↺ = nhắc lại câu hiện tại, ⏮ = về từ trước
     // dọn UI còn sót của chế độ kia
     const bar = this.el("gapBar"); bar.style.transition = "none"; bar.style.transform = "scaleX(0)";
     const hint = this.el("shadowHint"); hint.classList.add("hidden"); hint.textContent = "";
@@ -300,7 +303,22 @@ const Car = {
     hint.classList.add("hidden");
   },
 
+  ensureDialogs() {
+    // nạp data/dialogs.js theo yêu cầu — không tải sẵn 26KB khi chỉ dùng chế độ từ vựng
+    if (typeof DIALOGS !== "undefined") return Promise.resolve();
+    if (this._dlgLoading) return this._dlgLoading;
+    this._dlgLoading = new Promise(res => {
+      const sc = document.createElement("script");
+      sc.src = "data/dialogs.js";
+      sc.onload = () => res();
+      sc.onerror = () => res(); // lỗi mạng: listenLoop sẽ tự pause vì DIALOGS vẫn undefined
+      document.head.appendChild(sc);
+    });
+    return this._dlgLoading;
+  },
+
   async listenLoop() {
+    await this.ensureDialogs();
     const t = ++this.token;
     while (this.ok(t)) {
       if (typeof DIALOGS === "undefined" || !DIALOGS.length) { this.pause(); return; }
@@ -312,6 +330,7 @@ const Car = {
         if (!this.dlgDeck.length) this.dlgDeck = shuffle(DIALOGS.slice());
         d = this.dlgDeck.shift();
         this.dlgCur = d; this.dlgSeen++;
+        Store.data.dialogs.seen = this.dlgSeen; Store.save(); // lưu tiến độ luyện tai qua các phiên
       }
       if (!await this.playDialog(d, t)) return;
     }
@@ -330,6 +349,7 @@ const Car = {
         if (!this.seenSet.has(w.w)) { // replay/quay lại không đếm trùng
           this.seenSet.add(w.w);
           SRS.carSeen(w.w);
+          this._learnedCount = null; // từ mới vừa vào lịch ôn → cập nhật lại thanh tiến độ
           if (wasNew) this.countNew++; else this.countReview++;
           this.sessionWords.push(w);
         }
@@ -340,15 +360,17 @@ const Car = {
         this.wi++;
       } else if (this.phase === "review") {
         if (this.wi >= this.batch.length) {
-          this.cycle.push(...this.batch);
-          this.batchNo++;
-          if (this.batchNo % 5 === 0 && this.cycle.length) {
-            this.phase = "mega";
-            this.mega = shuffle(this.cycle.slice(-UNIT_SIZE * 5));
-            this.wi = 0;
-          } else {
-            this.startNewBatch();
+          if (this.batch.length >= 2) { // lô lẻ 1 từ (cuối nguồn) không tính vào chu kỳ ôn tập lớn
+            this.cycle.push(...this.batch);
+            this.batchNo++;
+            if (this.batchNo % 5 === 0 && this.cycle.length) {
+              this.phase = "mega";
+              this.mega = shuffle(this.cycle.slice(-UNIT_SIZE * 5));
+              this.wi = 0;
+              continue;
+            }
           }
+          this.startNewBatch();
           continue;
         }
         if (!await this.playOnce(this.batch[this.wi], t, 2200, this.wi)) return;
@@ -451,6 +473,8 @@ const Car = {
     try {
       if ("wakeLock" in navigator) {
         this.wakeLock = await navigator.wakeLock.request("screen");
+        // OS có thể thu hồi lock mà không qua visibilitychange — tự xin lại nếu còn đang chạy
+        this.wakeLock.addEventListener("release", () => { if (this.playing) this.requestWake(); });
       }
     } catch {}
   },
@@ -468,7 +492,14 @@ const Car = {
       this.pause();
       s.mode = setMode.value; this.mode = s.mode;
       Store.data.settingsAt = Date.now(); Store.save();
-      if (this.mode === "listen") { this.dlgSeen = 0; this.dlgDeck = []; this.dlgCur = null; this._repeat = false; }
+      if (this.mode === "listen") {
+        this.dlgSeen = Store.data.dialogs?.seen || 0; // giữ tiến độ tích lũy, chỉ reset deck của phiên
+        this.dlgDeck = []; this.dlgCur = null; this._repeat = false;
+      } else {
+        // về chế độ từ vựng: reset state lô để không kích "ôn tập lớn" ngay lập tức
+        this.phase = "idle"; this.batch = []; this.batchNo = 0; this.cycle = [];
+        this.wi = 0; this.rep = 0; this._learnedCount = null;
+      }
       this.applyMode();
       this._lastWord = null;
       if (wasPlaying) this.play();
@@ -510,6 +541,7 @@ const Car = {
 
   init() {
     this.mode = this.s().mode || "vocab";
+    this.dlgSeen = Store.data.dialogs?.seen || 0; // khôi phục tiến độ luyện tai đã lưu
     this.bindSettings();
     this.applyMode();
     this.el("btnPlay").onclick = () => this.toggle();
@@ -569,7 +601,7 @@ const Car = {
       this.el("overlayInfo").innerHTML =
         (due ? `Có <b>${due}</b> từ đến hạn ôn, học trước rồi sang từ mới.` :
           `Bắt đầu với từ mới theo lộ trình.`) +
-        `<br>Cứ 5 từ ôn một lượt, 5 lô có bài ôn tập lớn.`;
+        `<br><small class="muted">Mỗi <b>lô</b> = 5 từ: nghe xong 1 lô là ôn luôn. Qua 5 lô (25 từ) sẽ có 1 vòng ôn tổng trước khi học tiếp.</small>`;
     }
 
     this.render();

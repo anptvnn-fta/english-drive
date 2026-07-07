@@ -224,6 +224,8 @@ body.car-body {
   display: grid; place-items: center; border-radius: 14px;
 }
 .car-top .car-btn-sm:active { background: var(--surface-2); }
+/* todayInfo co gọn với dấu "…" thay vì xuống dòng — giữ car-top 1 dòng trên màn hình xe/điện thoại hẹp */
+.car-top .today-info { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
 
 .car-stage {
   position: relative;
@@ -332,10 +334,10 @@ body.car-body {
 
 .flash-zone { display: flex; flex-direction: column; align-items: center; gap: 22px; }
 .flashcard {
-  width: min(620px, 100%); min-height: 360px; perspective: 1200px; cursor: pointer;
+  width: min(620px, 100%); min-height: 460px; perspective: 1200px; cursor: pointer;
 }
 .flash-inner {
-  position: relative; width: 100%; min-height: 360px;
+  position: relative; width: 100%; min-height: 460px; /* cao cố định để không nhảy layout giữa thẻ có ảnh và thẻ không */
   display: grid; /* hai mặt xếp chồng cùng ô lưới → chiều cao co theo mặt cao nhất */
   transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -469,4 +471,21 @@ body.car-body {
   background: var(--surface-2); border: 1px solid var(--amber-deep); color: var(--text);
   padding: 12px 22px; border-radius: 999px; z-index: 50; font-weight: 600;
   animation: fadeIn 0.25s ease both;
+}
+
+/* cảnh báo nhẹ khi từ đến hạn tích quá nhiều (ô "từ đến hạn ôn" ở Trang chủ) */
+.stat.warn { border-color: var(--amber-deep); background: var(--amber-glow); }
+.stat.warn b { color: var(--amber); }
+
+/* khối onboarding cho người mới trên Trang chủ */
+.onboard { text-align: center; padding: 6px 4px; }
+
+/* màn hình rất hẹp (điện thoại ~375px, một số màn xe): nav thành 1 hàng cuộn ngang, không tràn dòng */
+@media (max-width: 520px) {
+  .topbar { flex-wrap: nowrap; gap: 8px; }
+  .nav { flex-wrap: nowrap; overflow-x: auto; min-width: 0; gap: 3px; -webkit-overflow-scrolling: touch; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { padding: 6px 9px; font-size: 0.8rem; white-space: nowrap; flex: none; }
+  /* trò xếp chữ: cụm dài vẫn cuộn được trong khung, không đội cả trang */
+  .slots { max-height: 34vh; overflow-y: auto; }
 }

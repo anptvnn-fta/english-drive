@@ -2,16 +2,28 @@
 
 const Home = {
   el(id) { return document.getElementById(id); },
+  esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); },
 
   renderStats() {
     this.el("stLearned").textContent = SRS.learnedWords().length;
-    this.el("stDue").textContent = SRS.dueWords().length;
+    const due = SRS.dueWords().length; // gọi 1 lần, dùng lại
+    this.el("stDue").textContent = due;
     this.el("stStreak").textContent = Store.streak();
     this.el("stToday").textContent = Store.todayLog().new;
-    const due = SRS.dueWords().length;
     this.el("mFlash").textContent = due
       ? `${due} từ đến hạn ôn đang chờ`
       : "Ôn từ đến hạn + học từ mới";
+    // cảnh báo nhẹ khi tích lũy quá nhiều (vd sau kỳ nghỉ) — ôn dồn dễ nản
+    const stat = this.el("stDue").closest(".stat");
+    if (stat) {
+      if (due > 50) {
+        stat.title = `${due} từ đến hạn — ôn 20-30 từ mỗi ngày là vừa, không cần giải quyết hết một lúc.`;
+        stat.classList.add("warn");
+      } else {
+        stat.removeAttribute("title");
+        stat.classList.remove("warn");
+      }
+    }
   },
 
   renderRoadmap() {
@@ -43,6 +55,19 @@ const Home = {
   },
 
   renderProgress() {
+    // Onboarding: người mới chưa học từ nào → chỉ dẫn bắt đầu thay vì hiện toàn số 0
+    if (SRS.learnedWords().length === 0) {
+      this.el("progressPanel").innerHTML = `
+        <div class="onboard">
+          <p style="font-size:1.05rem;margin-bottom:12px">👋 Chào anh! Chưa có từ nào được học. Bắt đầu theo 1 trong 2 cách:</p>
+          <ol style="line-height:2.1;text-align:left;display:inline-block;margin:0">
+            <li>🃏 <b>Flashcard</b> — học từ mới ngay trên máy tính (bấm ô Flashcard ở trên)</li>
+            <li>🚗 <b>Trên xe</b> — mở màn Trên xe, nhấn <b>Bắt đầu</b>, nghe và đọc theo khi lái</li>
+          </ol>
+          <p class="muted" style="margin-top:12px;font-size:0.9rem">Sau khi học vài từ, khu vực này sẽ hiện tiến độ và lịch ôn của anh.</p>
+        </div>`;
+      return;
+    }
     const words = Store.data.words;
     const now = Date.now();
     const endToday = new Date(); endToday.setHours(23, 59, 59, 999);
@@ -107,7 +132,7 @@ const Home = {
     const last = +localStorage.getItem(SYNC.lastKey) || 0;
     const when = last ? new Date(last).toLocaleString("vi-VN") : "chưa lần nào";
     const stt = { off: "tắt", ok: "✓ đã đồng bộ", error: "⚠ lỗi mạng", syncing: "đang đồng bộ…" }[SYNC.status] || "";
-    box.innerHTML = `Mã: <b>${code}</b> · ${stt} · lần cuối: ${when}`;
+    box.innerHTML = `Mã: <b>${this.esc(code)}</b> · ${stt} · lần cuối: ${this.esc(when)}`;
   },
 
   bindSync() {
@@ -124,6 +149,7 @@ const Home = {
     this.el("btnEnterCode").onclick = async () => {
       const v = (this.el("syncCodeInput").value || "").toLowerCase().trim();
       if (!v) return toast("Gõ mã vào ô bên cạnh trước đã anh.");
+      if (!/^[a-z0-9-]+$/.test(v)) return toast("Mã chỉ gồm chữ thường, số và dấu gạch ngang.");
       if (v.replace(/-/g, "").length < 12) return toast("Mã không hợp lệ — kiểm tra lại.");
       const oldCode = SYNC.code;
       SYNC.setCode(v);
@@ -151,9 +177,23 @@ const Home = {
           this.renderSync();
         };
       } else {
-        const okd = await SYNC.syncNow();
-        toast(okd ? "Đã kết nối!" : "Đồng bộ lỗi — thử lại sau.");
-        this.refresh();
+        // mã chưa có dữ liệu: vẫn xác nhận để tránh gõ nhầm mã rồi ghi đè lên mã trống của người khác
+        confirmBox.classList.remove("hidden");
+        confirmBox.innerHTML =
+          `Mã <b>${v}</b> chưa có dữ liệu. Gắn tiến độ máy này vào mã này? ` +
+          `<button class="btn btn-amber" id="btnMergeYes" style="margin:0 6px">Xác nhận</button>` +
+          `<button class="btn" id="btnMergeNo">Hủy</button>`;
+        document.getElementById("btnMergeYes").onclick = async () => {
+          confirmBox.classList.add("hidden");
+          const okd = await SYNC.syncNow();
+          toast(okd ? "Đã kết nối!" : "Đồng bộ lỗi — thử lại sau.");
+          this.refresh();
+        };
+        document.getElementById("btnMergeNo").onclick = () => {
+          SYNC.setCode(oldCode);
+          confirmBox.classList.add("hidden");
+          this.renderSync();
+        };
       }
     };
     this.el("btnSyncNow").onclick = async () => {
@@ -204,11 +244,14 @@ const Home = {
       a.href = URL.createObjectURL(blob);
       a.download = `engdrive-tien-do-${Store.todayKey()}.json`;
       a.click();
-      URL.revokeObjectURL(a.href);
+      // hoãn revoke: Android ô tô cần thời gian enqueue download trước khi blob bị giải phóng
+      setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     };
     this.el("btnAnki").onclick = () => {
       // TSV: cột 1 = mặt trước (từ), cột 2 = mặt sau (IPA · nghĩa · ví dụ · liên tưởng). <br> xuống dòng trong Anki.
-      const esc = s => (s || "").replace(/\t/g, " ").replace(/\r?\n/g, " ").trim();
+      const esc = s => (s || "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") // #html:true nên phải escape trước
+        .replace(/\t/g, " ").replace(/\r?\n/g, " ").trim();
       const lines = VOCAB.map(w => {
         const front = `${w.e ? w.e + " " : ""}${esc(w.w)}`;
         const parts = [`/${esc(w.i)}/ · (${esc(w.p)}) ${esc(w.v)}`, esc(w.ex), esc(w.xv)];
@@ -221,13 +264,14 @@ const Home = {
       a.href = URL.createObjectURL(blob);
       a.download = "engdrive-anki.txt";
       a.click();
-      URL.revokeObjectURL(a.href);
+      setTimeout(() => URL.revokeObjectURL(a.href), 3000);
       toast(`Đã xuất ${lines.length} thẻ — mở Anki, File → Import, chọn file này.`);
     };
     this.el("btnImport").onclick = () => this.el("importFile").click();
     this.el("importFile").onchange = e => {
       const f = e.target.files[0];
       if (!f) return;
+      if (f.size > 2 * 1024 * 1024) { toast("File quá lớn (>2MB) — không giống file tiến độ EngDrive."); e.target.value = ""; return; }
       f.text().then(txt => {
         try {
           const incoming = JSON.parse(txt);
